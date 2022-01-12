@@ -2,6 +2,7 @@ package org.cloudevguru.hkbus.enquiry.api.feign;
 
 import org.cloudevguru.hkbus.enquiry.api.dto.kmb.v1.KMBv1RouteListResponse;
 import org.cloudevguru.hkbus.enquiry.api.dto.kmb.v1.KMBv1RouteResponse;
+import org.cloudevguru.hkbus.enquiry.api.dto.kmb.v1.KMBv1RouteStopEtaResponse;
 import org.cloudevguru.hkbus.enquiry.api.dto.kmb.v1.KMBv1RouteStopListResponse;
 import org.cloudevguru.hkbus.enquiry.api.dto.kmb.v1.KMBv1StopListResponse;
 import org.cloudevguru.hkbus.enquiry.api.dto.kmb.v1.KMBv1StopResponse;
@@ -10,7 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-@FeignClient(value = "kmbClient", url = "https://data.etabus.gov.hk")
+@FeignClient(value = "kmbClient", url = "${kmb.api.url}")
 public interface KMBClient {
 
 	// v1
@@ -36,5 +37,9 @@ public interface KMBClient {
 	@RequestMapping(method = RequestMethod.GET, value = "/v1/transport/kmb/route-stop/{route}/{direction}/{serviceType}")
 	KMBv1RouteStopListResponse getKMBv1RouteStopList(@PathVariable("route") String route, @PathVariable("direction") String direction,
 			@PathVariable("serviceType") String serviceType);
+	
+	//RouteStopEta
+	@RequestMapping(method = RequestMethod.GET, value = "/v1/transport/kmb/eta/{stopId}/{route}/{serviceType}")
+	KMBv1RouteStopEtaResponse getKMBv1RouteStopEta(@PathVariable("stopId") String stopId,@PathVariable("route") String route, @PathVariable("serviceType") String serviceType);
 
 }

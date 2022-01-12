@@ -7,6 +7,7 @@ import org.cloudevguru.hkbus.enquiry.api.constants.BusEnquiryConstant.*;
 import org.cloudevguru.hkbus.enquiry.api.dto.kmb.v1.KMBv1RouteDto;
 import org.cloudevguru.hkbus.enquiry.api.dto.kmb.v1.KMBv1RouteListResponse;
 import org.cloudevguru.hkbus.enquiry.api.dto.kmb.v1.KMBv1RouteResponse;
+import org.cloudevguru.hkbus.enquiry.api.dto.kmb.v1.KMBv1RouteStopEtaResponse;
 import org.cloudevguru.hkbus.enquiry.api.dto.kmb.v1.KMBv1RouteStopListResponse;
 import org.cloudevguru.hkbus.enquiry.api.dto.kmb.v1.KMBv1StopListResponse;
 import org.cloudevguru.hkbus.enquiry.api.dto.kmb.v1.KMBv1StopResponse;
@@ -20,7 +21,7 @@ public class KMBManager {
 
 	@Autowired
 	private KMBService kmbService;
-	
+
 	@Autowired
 	private UtilityService utilityService;
 
@@ -37,7 +38,7 @@ public class KMBManager {
 		for (DirectionFullEum directionFull : DirectionFullEum.values()) {
 			kmbResponse = kmbService.getKMBv1RouteByRouteAndDirectionAndServiceType(route.toUpperCase(),
 					directionFull.getValue(), "1");
-			if(kmbResponse.getDto().getOriginEn()!=null) {
+			if (kmbResponse.getDto().getOriginEn() != null) {
 				dtos.add(kmbResponse.getDto());
 			}
 		}
@@ -69,7 +70,12 @@ public class KMBManager {
 
 	public KMBv1RouteStopListResponse getKMBv1RouteStopListByRouteAndDirection(String route, String direction) {
 		String directionFull = utilityService.convertDirectionToFull(direction);
-		return kmbService.getKMBv1RouteStopListByRouteAndDirectionAndServiceType(route.toUpperCase(), directionFull,"1");
+		return kmbService.getKMBv1RouteStopListByRouteAndDirectionAndServiceType(route.toUpperCase(), directionFull,
+				"1");
+	}
+
+	public KMBv1RouteStopEtaResponse getKMBv1RouteStopEtaByRouteAndStopId(String stopId, String route) {
+		return kmbService.getKMBv1RouteStopEtaByStopIdAndRouteAndServiceType(stopId, route.toUpperCase(), "1");
 	}
 
 }
