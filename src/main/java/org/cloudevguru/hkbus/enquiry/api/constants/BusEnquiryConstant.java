@@ -2,6 +2,8 @@ package org.cloudevguru.hkbus.enquiry.api.constants;
 
 public class BusEnquiryConstant {
 	
+	public static final String KMB_ETA_FORMAT ="yyyy-MM-dd'T'HH:mm:ssX";
+	
 	public enum RequestTypeEum {
 		ROUTE("Route"),
 		ROUTELIST("RouteList"),

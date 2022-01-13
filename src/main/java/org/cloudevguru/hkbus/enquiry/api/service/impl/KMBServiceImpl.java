@@ -2,6 +2,7 @@ package org.cloudevguru.hkbus.enquiry.api.service.impl;
 
 import org.cloudevguru.hkbus.enquiry.api.dto.kmb.v1.KMBv1RouteListResponse;
 import org.cloudevguru.hkbus.enquiry.api.dto.kmb.v1.KMBv1RouteResponse;
+import org.cloudevguru.hkbus.enquiry.api.dto.kmb.v1.KMBv1RouteStopEtaResponse;
 import org.cloudevguru.hkbus.enquiry.api.dto.kmb.v1.KMBv1RouteStopListResponse;
 import org.cloudevguru.hkbus.enquiry.api.dto.kmb.v1.KMBv1StopListResponse;
 import org.cloudevguru.hkbus.enquiry.api.dto.kmb.v1.KMBv1StopResponse;
@@ -51,6 +52,13 @@ public class KMBServiceImpl implements KMBService {
 	public KMBv1RouteStopListResponse getKMBv1RouteStopListByRouteAndDirectionAndServiceType(String route, String direction,
 			String serviceType) {
 		return kmbClient.getKMBv1RouteStopList(route, direction, serviceType);
+	}
+	
+	//RouteStopETA
+	@Override
+	public KMBv1RouteStopEtaResponse getKMBv1RouteStopEtaByStopIdAndRouteAndServiceType(String stopId, String route,
+			String serviceType) {
+		return kmbClient.getKMBv1RouteStopEta(stopId, route, serviceType);
 	}
 
 }
