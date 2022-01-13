@@ -7,13 +7,13 @@ import org.cloudevguru.hkbus.enquiry.api.constants.BusEnquiryConstant.*;
 import org.cloudevguru.hkbus.enquiry.api.dto.ctbnwfb.v1.CTBNWFBv1RouteDto;
 import org.cloudevguru.hkbus.enquiry.api.dto.ctbnwfb.v1.CTBNWFBv1RouteListResponse;
 import org.cloudevguru.hkbus.enquiry.api.dto.ctbnwfb.v1.CTBNWFBv1RouteResponse;
+import org.cloudevguru.hkbus.enquiry.api.dto.ctbnwfb.v1.CTBNWFBv1RouteStopEtaResponse;
 import org.cloudevguru.hkbus.enquiry.api.dto.ctbnwfb.v1.CTBNWFBv1RouteStopListResponse;
 import org.cloudevguru.hkbus.enquiry.api.dto.ctbnwfb.v1.CTBNWFBv1StopResponse;
 import org.cloudevguru.hkbus.enquiry.api.service.CTBNWFBService;
 import org.cloudevguru.hkbus.enquiry.api.service.UtilityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
 
 @Component
 public class CTBNWFBManager {
@@ -29,16 +29,19 @@ public class CTBNWFBManager {
 	public CTBNWFBv1RouteListResponse getCTBNWFBv1RouteListByCompanyAndRoute(String company, String route) {
 		CTBNWFBv1RouteListResponse response = new CTBNWFBv1RouteListResponse();
 		List<CTBNWFBv1RouteDto> dtos = new ArrayList<CTBNWFBv1RouteDto>();
-		CTBNWFBv1RouteStopListResponse ctbnwfBv1RouteStopListInboundResponse=ctbnwfbService.getCTBNWFBv1RouteStopListByCompanyAndRouteAndDirection(company, route, DirectionFullEum.INBOUND.getValue());
+		CTBNWFBv1RouteStopListResponse ctbnwfBv1RouteStopListInboundResponse = ctbnwfbService
+				.getCTBNWFBv1RouteStopListByCompanyAndRouteAndDirection(company, route,
+						DirectionFullEum.INBOUND.getValue());
 		CTBNWFBv1RouteResponse outboundResponse = ctbnwfbService.getCTBNWFBv1RouteByCompanyAndRoute(company, route);
 		CTBNWFBv1RouteDto outboundRouteDto = outboundResponse.getDto();
-		if(outboundRouteDto.getCompany()!=null) {
+		if (outboundRouteDto.getCompany() != null) {
 			outboundRouteDto.setBound(DirectionShortEum.OUTBOUND.getValue());
-			if(ctbnwfBv1RouteStopListInboundResponse.getDtos().isEmpty()) {
-				//If no inbound route-stop list, it is Circular Route and only have outbound
+			if (ctbnwfBv1RouteStopListInboundResponse.getDtos().isEmpty()) {
+				// If no inbound route-stop list, it is Circular Route and only have outbound
 				dtos.add(outboundRouteDto);
-			}else {
-				//If have inbound route-stop list, it is not Circular Route and have both direction
+			} else {
+				// If have inbound route-stop list, it is not Circular Route and have both
+				// direction
 				dtos.add(outboundRouteDto);
 				dtos.add(ctbnwfbService.convertToInbound(outboundResponse.getDto()));
 			}
@@ -65,6 +68,12 @@ public class CTBNWFBManager {
 		String directionFull = utilityService.convertDirectionToFull(direction);
 		return ctbnwfbService.getCTBNWFBv1RouteStopListByCompanyAndRouteAndDirection(company, route.toUpperCase(),
 				directionFull);
+	}
+
+	public CTBNWFBv1RouteStopEtaResponse getCTBNWFBv1RouteStopEtaByCompanyAndStopIdAndRoute(String companyId,
+			String stopId, String route) {
+		return ctbnwfbService.getCTBNWFBv1RouteStopEtaByCompanyAndStopIdAndRoute(companyId, stopId,
+				route.toUpperCase());
 	}
 
 }

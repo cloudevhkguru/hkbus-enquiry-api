@@ -54,6 +54,7 @@ public class KMBServiceImpl implements KMBService {
 		return kmbClient.getKMBv1RouteStopList(route, direction, serviceType);
 	}
 	
+	//RouteStopETA
 	@Override
 	public KMBv1RouteStopEtaResponse getKMBv1RouteStopEtaByStopIdAndRouteAndServiceType(String stopId, String route,
 			String serviceType) {
