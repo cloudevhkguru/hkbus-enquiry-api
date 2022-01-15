@@ -2,6 +2,7 @@ package org.cloudevguru.hkbus.enquiry.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Date;
 import java.util.List;
 
 import org.cloudevguru.hkbus.enquiry.api.configuration.UnitTestConfiguration;
@@ -10,10 +11,14 @@ import org.cloudevguru.hkbus.enquiry.api.dto.ctbnwfb.v1.CTBNWFBv1RouteDto;
 import org.cloudevguru.hkbus.enquiry.api.dto.ctbnwfb.v1.CTBNWFBv1RouteListResponse;
 import org.cloudevguru.hkbus.enquiry.api.dto.ctbnwfb.v1.CTBNWFBv1RouteResponse;
 import org.cloudevguru.hkbus.enquiry.api.dto.ctbnwfb.v1.CTBNWFBv1RouteStopDto;
+import org.cloudevguru.hkbus.enquiry.api.dto.ctbnwfb.v1.CTBNWFBv1RouteStopEtaDto;
+import org.cloudevguru.hkbus.enquiry.api.dto.ctbnwfb.v1.CTBNWFBv1RouteStopEtaResponse;
 import org.cloudevguru.hkbus.enquiry.api.dto.ctbnwfb.v1.CTBNWFBv1RouteStopListResponse;
 import org.cloudevguru.hkbus.enquiry.api.dto.kmb.v1.KMBv1RouteDto;
 import org.cloudevguru.hkbus.enquiry.api.dto.kmb.v1.KMBv1RouteResponse;
 import org.cloudevguru.hkbus.enquiry.api.dto.kmb.v1.KMBv1RouteStopDto;
+import org.cloudevguru.hkbus.enquiry.api.dto.kmb.v1.KMBv1RouteStopEtaDto;
+import org.cloudevguru.hkbus.enquiry.api.dto.kmb.v1.KMBv1RouteStopEtaResponse;
 import org.cloudevguru.hkbus.enquiry.api.dto.kmb.v1.KMBv1RouteStopListResponse;
 import org.cloudevguru.hkbus.enquiry.api.dto.managed.ManagedRouteDetailDto;
 import org.cloudevguru.hkbus.enquiry.api.dto.managed.ManagedRouteDetailResponse;
@@ -21,6 +26,8 @@ import org.cloudevguru.hkbus.enquiry.api.dto.managed.ManagedRouteDto;
 import org.cloudevguru.hkbus.enquiry.api.dto.managed.ManagedRouteListResponse;
 import org.cloudevguru.hkbus.enquiry.api.dto.managed.ManagedRouteResponse;
 import org.cloudevguru.hkbus.enquiry.api.dto.managed.ManagedRouteStopDto;
+import org.cloudevguru.hkbus.enquiry.api.dto.managed.ManagedRouteStopEtaDto;
+import org.cloudevguru.hkbus.enquiry.api.dto.managed.ManagedRouteStopEtaResponse;
 import org.cloudevguru.hkbus.enquiry.api.dto.managed.ManagedRouteStopListResponse;
 import org.cloudevguru.hkbus.enquiry.api.dto.managed.ManagedStopDetailDto;
 import org.cloudevguru.hkbus.enquiry.api.dto.managed.ManagedStopDto;
@@ -68,6 +75,17 @@ public class ManagerTest {
 		assertThat(dtos.get(1).getRoute()).isEqualTo(UnitTestConfiguration.testKMBRoute101());
 		assertThat(dtos.get(2).getStop()).isNotBlank();
 	}
+	
+	@Test
+	@DisplayName("KMBManager.getKMBv1RouteStopEtaByRouteAndStopId Test KMB")
+	public void testGetKMBv1RouteStopEtaByRouteAndStopId() throws Exception {
+		KMBv1RouteStopEtaResponse response = kmbManager.getKMBv1RouteStopEtaByRouteAndStopId(UnitTestConfiguration.testKMB1AInboundStop(), UnitTestConfiguration.testKMBRoute1A());
+		List<KMBv1RouteStopEtaDto> dtos = response.getDtos();
+		assertThat(dtos.size()).isGreaterThan(0);
+		assertThat(dtos.get(0).getRoute()).isEqualTo(UnitTestConfiguration.testKMBRoute1A());
+		assertThat(dtos.get(0).getDestinationEn()).isNotBlank();
+		assertThat(dtos.get(0).getEta()).isAfter(new Date());
+	}
 
 	// CTB
 	@Test
@@ -101,6 +119,17 @@ public class ManagerTest {
 		assertThat(dtos.get(1).getRoute()).isEqualTo(UnitTestConfiguration.testCTBRouteA29());
 		assertThat(dtos.get(2).getStop()).isNotBlank();
 	}
+	
+	@Test
+	@DisplayName("CTBNWFBManager.getCTBNWFBv1RouteStopEtaByCompanyAndStopIdAndRoute Test CTB")
+	public void testGetCTBNWFBv1RouteStopEtaByCompanyAndStopIdAndRouteCTB() throws Exception {
+		CTBNWFBv1RouteStopEtaResponse response = ctbnwfbManager.getCTBNWFBv1RouteStopEtaByCompanyAndStopIdAndRoute(BusCompanyEum.CTB.getValue(), UnitTestConfiguration.testCTBA29InboundStop(), UnitTestConfiguration.testCTBRouteA29());
+		List<CTBNWFBv1RouteStopEtaDto> dtos = response.getDtos();
+		assertThat(dtos.size()).isGreaterThan(0);
+		assertThat(dtos.get(0).getRoute()).isEqualTo(UnitTestConfiguration.testCTBRouteA29());
+		assertThat(dtos.get(0).getDestinationEn()).isNotBlank();
+		assertThat(dtos.get(0).getEta()).isAfter(new Date());
+	}
 
 	// NWFB
 	@Test
@@ -133,6 +162,17 @@ public class ManagerTest {
 		assertThat(dtos.size()).isGreaterThan(0);
 		assertThat(dtos.get(1).getRoute()).isEqualTo(UnitTestConfiguration.testNWFBRoute15C());
 		assertThat(dtos.get(2).getStop()).isNotBlank();
+	}
+	
+	@Test
+	@DisplayName("CTBNWFBManager.getCTBNWFBv1RouteStopEtaByCompanyAndStopIdAndRoute Test NWFB")
+	public void testGetCTBNWFBv1RouteStopEtaByCompanyAndStopIdAndRouteNWFB() throws Exception {
+		CTBNWFBv1RouteStopEtaResponse response = ctbnwfbManager.getCTBNWFBv1RouteStopEtaByCompanyAndStopIdAndRoute(BusCompanyEum.NWFB.getValue(), UnitTestConfiguration.testNWFB18OutboundStop(), UnitTestConfiguration.testNWFBRoute18());
+		List<CTBNWFBv1RouteStopEtaDto> dtos = response.getDtos();
+		assertThat(dtos.size()).isGreaterThan(0);
+		assertThat(dtos.get(0).getRoute()).isEqualTo(UnitTestConfiguration.testNWFBRoute18());
+		assertThat(dtos.get(0).getDestinationEn()).isNotBlank();
+		assertThat(dtos.get(0).getEta()).isAfter(new Date());
 	}
 
 	// Managed
@@ -209,6 +249,17 @@ public class ManagerTest {
 		assertThat(stopDetailDtos.get(2).getSeq()).isNotNull();
 		assertThat(stopDetailDtos.get(3).getStopDto().getNameEn()).isNotNull();
 	}
+	
+	@Test
+	@DisplayName("ManagedManager.getRouteStopEtaByCompanyAndStopIdAndRouteAndDirection Test KMB")
+	public void testGetRouteStopEtaByCompanyAndStopIdAndRouteAndDirectionKMB() throws Exception {
+		ManagedRouteStopEtaResponse response = managedManager.getRouteStopEtaByCompanyAndStopIdAndRouteAndDirection(BusCompanyEum.KMB.getValue(),UnitTestConfiguration.testKMB1AInboundStop(), UnitTestConfiguration.testKMBRoute1A(),DirectionFullEum.INBOUND.getValue());
+		List<ManagedRouteStopEtaDto> dtos = response.getRouteStopEtaDtos();
+		assertThat(dtos.size()).isGreaterThan(0);
+		assertThat(dtos.get(0)).isNotNull();
+		assertThat(dtos.get(0).getDestinationEn()).isNotBlank();
+		assertThat(dtos.get(0).getEta()).isAfter(new Date());
+	}
 
 	// CTB
 	@Test
@@ -270,6 +321,17 @@ public class ManagerTest {
 		assertThat(stopDetailDtos.get(3).getStopDto().getNameEn()).isNotNull();
 	}
 
+	@Test
+	@DisplayName("ManagedManager.getRouteStopEtaByCompanyAndStopIdAndRouteAndDirection Test CTB")
+	public void testGetRouteStopEtaByCompanyAndStopIdAndRouteAndDirectionCTB() throws Exception {
+		ManagedRouteStopEtaResponse response = managedManager.getRouteStopEtaByCompanyAndStopIdAndRouteAndDirection(BusCompanyEum.CTB.getValue(),UnitTestConfiguration.testCTBA29InboundStop(), UnitTestConfiguration.testCTBRouteA29(),DirectionFullEum.INBOUND.getValue());
+		List<ManagedRouteStopEtaDto> dtos = response.getRouteStopEtaDtos();
+		assertThat(dtos.size()).isGreaterThan(0);
+		assertThat(dtos.get(0)).isNotNull();
+		assertThat(dtos.get(0).getDestinationEn()).isNotBlank();
+		assertThat(dtos.get(0).getEta()).isAfter(new Date());
+	}
+
 	// NWFB
 	@Test
 	@DisplayName("ManagedManager.getRouteListByCompanyAndRoute Test NWFB")
@@ -316,6 +378,17 @@ public class ManagerTest {
 		assertThat(stopDetailDtos.size()).isGreaterThan(2);
 		assertThat(stopDetailDtos.get(2).getSeq()).isNotNull();
 		assertThat(stopDetailDtos.get(3).getStopDto().getNameEn()).isNotNull();
+	}
+	
+	@Test
+	@DisplayName("ManagedManager.getRouteStopEtaByCompanyAndStopIdAndRouteAndDirection Test NWFB")
+	public void testGetRouteStopEtaByCompanyAndStopIdAndRouteAndDirectionNWFB() throws Exception {
+		ManagedRouteStopEtaResponse response = managedManager.getRouteStopEtaByCompanyAndStopIdAndRouteAndDirection(BusCompanyEum.NWFB.getValue(),UnitTestConfiguration.testNWFB18OutboundStop(), UnitTestConfiguration.testNWFBRoute18(),DirectionFullEum.OUTBOUND.getValue());
+		List<ManagedRouteStopEtaDto> dtos = response.getRouteStopEtaDtos();
+		assertThat(dtos.size()).isGreaterThan(0);
+		assertThat(dtos.get(0)).isNotNull();
+		assertThat(dtos.get(0).getDestinationEn()).isNotBlank();
+		assertThat(dtos.get(0).getEta()).isAfter(new Date());
 	}
 
 	// CTB-NWFB Stop
