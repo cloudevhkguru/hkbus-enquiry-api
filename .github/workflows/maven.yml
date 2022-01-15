@@ -1,13 +1,13 @@
 # This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
 # For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
 
-name: Java CI with Maven
+name: Java CI with Maven for UAT/main
 
 on:
   push:
-    branches: [ main ]
+    branches: [ UAT/main ]
   pull_request:
-    branches: [ main ]
+    branches: [ UAT/main ]
 
 jobs:
   build:
@@ -23,13 +23,6 @@ jobs:
         distribution: 'adopt'
         cache: maven
     - name: Maven Test
-      run: mvn test --file pom.xml -Pprd
+      run: mvn test --file pom.xml -Puat
     - name: Build with Maven
-      run: mvn -B package --file pom.xml -DskipTests -Pprd
-    - name: Build Docker Image
-      run: |
-        docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
-        docker build -t cloudevhkguru/hkbus-enquiry-api:1.0.0 .
-        docker tag cloudevhkguru/hkbus-enquiry-api:1.0.0 cloudevhkguru/hkbus-enquiry-api:latest
-        docker push cloudevhkguru/hkbus-enquiry-api:1.0.0
-        docker push cloudevhkguru/hkbus-enquiry-api:latest
+      run: mvn -B package --file pom.xml -DskipTests -Puat
