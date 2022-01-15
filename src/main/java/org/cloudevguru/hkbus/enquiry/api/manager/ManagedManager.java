@@ -71,14 +71,16 @@ public class ManagedManager {
 		} else {
 			CTBNWFBv1RouteListResponse ctbnwfbResponse = ctbnwfbManager.getCTBNWFBv1RouteListByCompanyAndRoute(company,
 					route);
-			if (ctbnwfbResponse.getDtos().size() == 1) {
-				isCircularRoute = true;
-			}
-			for (CTBNWFBv1RouteDto ctbnwfbRouteDto : ctbnwfbResponse.getDtos()) {
-				ManagedRouteDto managedRouteDto = modelMapper.map(ctbnwfbRouteDto, ManagedRouteDto.class);
-				managedRouteDto.setCompany(company.toLowerCase());
-				managedRouteDto.setIsCircularRoute(isCircularRoute);
-				managedRouteDtos.add(managedRouteDto);
+			if (ctbnwfbResponse.getDtos().size() != 0) {
+				if (ctbnwfbResponse.getDtos().size() == 1) {
+					isCircularRoute = true;
+				}
+				for (CTBNWFBv1RouteDto ctbnwfbRouteDto : ctbnwfbResponse.getDtos()) {
+					ManagedRouteDto managedRouteDto = modelMapper.map(ctbnwfbRouteDto, ManagedRouteDto.class);
+					managedRouteDto.setCompany(company.toLowerCase());
+					managedRouteDto.setIsCircularRoute(isCircularRoute);
+					managedRouteDtos.add(managedRouteDto);
+				}
 			}
 		}
 		managedResponse.setDtos(managedRouteDtos);
@@ -172,7 +174,7 @@ public class ManagedManager {
 			String direction) {
 		ManagedRouteDetailResponse response = new ManagedRouteDetailResponse();
 		ManagedRouteDto managedRouteDto = getRouteByCompanyAndRouteAndDirection(company, route, direction).getDto();
-		if (managedRouteDto.getCompany() != null) {
+		if (managedRouteDto != null) {
 			String directionFull = utilityService.convertDirectionToFull(managedRouteDto.getBound());
 			ManagedRouteDetailDto manageRouteDetailDto = modelMapper.map(managedRouteDto, ManagedRouteDetailDto.class);
 			List<ManagedRouteStopDto> managedRouteStopDtos = getRouteStopListByCompanyAndRouteAndDirection(company,
@@ -197,33 +199,37 @@ public class ManagedManager {
 			String stopId, String route, String direction) {
 		utilityService.checkIsValidBusCompany(company);
 		ManagedRouteStopEtaResponse response = new ManagedRouteStopEtaResponse();
-		ManagedRouteResponse routeResponse=getRouteByCompanyAndRouteAndDirection(company, route, direction);
-		ManagedStopResponse stopResponse=getStopByCompanyAndStopId(company, stopId);
-		List<ManagedRouteStopEtaDto> routeStopEtaDtos=new ArrayList<ManagedRouteStopEtaDto>();
-		Date currenDate=new Date();
-		if(company.equalsIgnoreCase(BusCompanyEum.KMB.getValue())) {
-			KMBv1RouteStopEtaResponse kmbV1RouteStopEtaResponse=kmbManager.getKMBv1RouteStopEtaByRouteAndStopId(stopId, route);
-			List<KMBv1RouteStopEtaDto> kmbRouteStopEtaDtos=kmbV1RouteStopEtaResponse.getDtos();
-			for(KMBv1RouteStopEtaDto kmbRouteStopEtaDto:kmbRouteStopEtaDtos) {
-				ManagedRouteStopEtaDto routeStopEtaDto=modelMapper.map(kmbRouteStopEtaDto, ManagedRouteStopEtaDto.class);
-				if(kmbRouteStopEtaDto.getEta()!=null) {
-					Date eta=kmbRouteStopEtaDto.getEta();
-					Long millsecondsDiff=eta.getTime()-currenDate.getTime();
-					Integer minutesDifference=(int) Math.floor(millsecondsDiff/60000);
+		ManagedRouteResponse routeResponse = getRouteByCompanyAndRouteAndDirection(company, route, direction);
+		ManagedStopResponse stopResponse = getStopByCompanyAndStopId(company, stopId);
+		List<ManagedRouteStopEtaDto> routeStopEtaDtos = new ArrayList<ManagedRouteStopEtaDto>();
+		Date currenDate = new Date();
+		if (company.equalsIgnoreCase(BusCompanyEum.KMB.getValue())) {
+			KMBv1RouteStopEtaResponse kmbV1RouteStopEtaResponse = kmbManager
+					.getKMBv1RouteStopEtaByRouteAndStopId(stopId, route);
+			List<KMBv1RouteStopEtaDto> kmbRouteStopEtaDtos = kmbV1RouteStopEtaResponse.getDtos();
+			for (KMBv1RouteStopEtaDto kmbRouteStopEtaDto : kmbRouteStopEtaDtos) {
+				ManagedRouteStopEtaDto routeStopEtaDto = modelMapper.map(kmbRouteStopEtaDto,
+						ManagedRouteStopEtaDto.class);
+				if (kmbRouteStopEtaDto.getEta() != null) {
+					Date eta = kmbRouteStopEtaDto.getEta();
+					Long millsecondsDiff = eta.getTime() - currenDate.getTime();
+					Integer minutesDifference = (int) Math.max(Math.floor(millsecondsDiff / 60000), 0);
 					routeStopEtaDto.setMinutes(minutesDifference);
 				}
 				routeStopEtaDtos.add(routeStopEtaDto);
 			}
-			
-		}else{
-			CTBNWFBv1RouteStopEtaResponse ctbnwfbv1RouteStopEtaResponse=ctbnwfbManager.getCTBNWFBv1RouteStopEtaByCompanyAndStopIdAndRoute(company, stopId, route);
-			List<CTBNWFBv1RouteStopEtaDto> ctbnwfbRouteStopEtaDtos=ctbnwfbv1RouteStopEtaResponse.getDtos();
-			for(CTBNWFBv1RouteStopEtaDto ctbnwfbRouteStopEtaDto:ctbnwfbRouteStopEtaDtos) {
-				ManagedRouteStopEtaDto routeStopEtaDto=modelMapper.map(ctbnwfbRouteStopEtaDto, ManagedRouteStopEtaDto.class);
-				if(ctbnwfbRouteStopEtaDto.getEta()!=null) {
-					Date eta=ctbnwfbRouteStopEtaDto.getEta();
-					Long millsecondsDiff=eta.getTime()-currenDate.getTime();
-					Integer minutesDifference=(int) Math.floor(millsecondsDiff/60000);
+
+		} else {
+			CTBNWFBv1RouteStopEtaResponse ctbnwfbv1RouteStopEtaResponse = ctbnwfbManager
+					.getCTBNWFBv1RouteStopEtaByCompanyAndStopIdAndRoute(company, stopId, route);
+			List<CTBNWFBv1RouteStopEtaDto> ctbnwfbRouteStopEtaDtos = ctbnwfbv1RouteStopEtaResponse.getDtos();
+			for (CTBNWFBv1RouteStopEtaDto ctbnwfbRouteStopEtaDto : ctbnwfbRouteStopEtaDtos) {
+				ManagedRouteStopEtaDto routeStopEtaDto = modelMapper.map(ctbnwfbRouteStopEtaDto,
+						ManagedRouteStopEtaDto.class);
+				if (ctbnwfbRouteStopEtaDto.getEta() != null) {
+					Date eta = ctbnwfbRouteStopEtaDto.getEta();
+					Long millsecondsDiff = eta.getTime() - currenDate.getTime();
+					Integer minutesDifference = (int) Math.floor(millsecondsDiff / 60000);
 					routeStopEtaDto.setMinutes(minutesDifference);
 				}
 				routeStopEtaDtos.add(routeStopEtaDto);
