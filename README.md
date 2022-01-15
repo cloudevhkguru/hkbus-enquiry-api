@@ -1,7 +1,10 @@
 <div id="top"></div>
+
 # Hong Kong Bus Enquiry API
 <!-- ABOUT THE PROJECT -->
 ## About The Project
+This project is to create APIs with Maven for consumer to use uniformed request and response to get the information from the different bus service providers.
+
 Bus Service Provides in Hong Kong have launched Open API for the public to access the information of bus routes, bus stops and estimated-time-of-arrival (ETA).
 
 There are two sets of API and each set are providing information from groups of providers:
@@ -14,8 +17,6 @@ However, the two major bus service providers operated independently and their AP
 - Both sets of API allow the user to use the get method to extract the information but have different requirements on path variables. For example, API of KMB and LWB does not require putting the company symbol (i.e. kmb or lwb) in the path meanwhile company symbol is a mandatory parameter for API of CTB and NWFB.
 
 - Bus route API of KMB and LWB offers the direction of bus route meanwhile the API of CTB and NWFB does not.
-
-This project is to create APIs using uniformed request and response for the user to get the information from the different bus service providers.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -31,6 +32,20 @@ We have also setup a <a href="https://hkbus-enquiry-web-cloudevhkguru.s3.ap-sout
 <image src="https://hkbus-enquiry-web-cloudevhkguru.s3.ap-southeast-1.amazonaws.com/website_screencapture.png">
 
 <p align="right">(<a href="#top">back to top</a>)</p>
+
+<!-- Build project on localhost-->
+
+## Working with the source code
+To build it, you will need to download and unpack the latest (or recent) version of Maven (https://maven.apache.org/download.cgi) and put the mvn command on your path. Then, you will need to install a Java 1.8 (or higher) JDK (not JRE!), and make sure you can run java from the command line. Now you can run mvn clean install and Maven will compile your project, an put the results it in a jar file in the target directory.
+
+How you run this code is up to you, but usually you would start by using an IDE like NetBeans, Intellij IDEA, or Eclipse.
+
+Once you have configured your project in your IDE you can build it from there. However if you prefer you can use maven from the command line. In that case you could be interested in this short list of commands:
+
+* `mvn compile`: it will just compile the code of your application and tell you if there are errors
+* `mvn test`: it will compile the code of your application and your tests. It will then run your tests (if you wrote any) and let you know if some fails
+* `mvn package`: it will do everything `mvn test` does and then if everything looks file it will package the jar file in the ./target folder. Once the jar file is packaged, you can move it to any folder with a machine having Java JRE and start with the command `java -jar hkbus-enquiry-api.jar` 
+
 <!-- Reference -->
 
 ## Reference
