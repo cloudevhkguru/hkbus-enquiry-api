@@ -27,6 +27,11 @@ public class UnitTestConfiguration {
 	}
 	
 	@Bean
+	public static String testKMB1AInboundStop() {
+		return "775FC7E2B86C4E3F";
+	}
+	
+	@Bean
 	public static String testCTBRouteA29() {
 		return "A29";
 	}
@@ -41,6 +46,10 @@ public class UnitTestConfiguration {
 		return "12A";
 	}
 	
+	public static String testCTBA29InboundStop() {
+		return "003540";
+	}
+	
 	@Bean
 	public static String testNWFBRoute15C() {
 		return "15C";
@@ -52,9 +61,13 @@ public class UnitTestConfiguration {
 	}
 	
 	@Bean
+	public static String testNWFB18OutboundStop() {
+		return "002964";
+	}
+	
+	@Bean
 	public static String testCTBNWFBStop() {
 		return "002737";
 	}
-
-
+	
 }
