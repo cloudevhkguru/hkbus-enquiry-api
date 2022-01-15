@@ -15,44 +15,52 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
 
-@CrossOrigin(origins =   "${cros.allow.origin}")
+@CrossOrigin(origins = "${cros.allow.origin}")
 @RestController
 @Api(value = "ctbnwfb-passthrough", description = "This API is to provide services for bus route of KMB, CTB and NWFB with uniformed path and response.")
 public class ManagedController {
 
 	@Autowired
 	private ManagedManager managedManager;
-	
-	//route
+
+	// route
 	@GetMapping(path = "/route/{company}/{route}")
-	public ManagedRouteListResponse getRouteListByCompanyByRoute(@PathVariable("company") String company,@PathVariable("route") String route) {
-		return managedManager.getRouteListByCompanyAndRoute(company,route);
+	public ManagedRouteListResponse getRouteListByCompanyByRoute(@PathVariable("company") String company,
+			@PathVariable("route") String route) {
+		return managedManager.getRouteListByCompanyAndRoute(company, route);
 	}
-	
+
 	@GetMapping(path = "/route/{company}/{route}/{direction}")
-	public ManagedRouteResponse getRouteByCompanyAndRouteAndDirection(@PathVariable("company") String company,@PathVariable("route") String route,@PathVariable("direction") String direction) {
-		return managedManager.getRouteByCompanyAndRouteAndDirection(company,route,direction);
+	public ManagedRouteResponse getRouteByCompanyAndRouteAndDirection(@PathVariable("company") String company,
+			@PathVariable("route") String route, @PathVariable("direction") String direction) {
+		return managedManager.getRouteByCompanyAndRouteAndDirection(company, route, direction);
 	}
-	
+
 	@GetMapping(path = "/stop/{company}/{stopId}")
-	public ManagedStopResponse getStopByCompanyAndStopId(@PathVariable("company") String company,@PathVariable("stopId") String stopId) {
-		return managedManager.getStopByCompanyAndStopId(company,stopId);
+	public ManagedStopResponse getStopByCompanyAndStopId(@PathVariable("company") String company,
+			@PathVariable("stopId") String stopId) {
+		return managedManager.getStopByCompanyAndStopId(company, stopId);
 	}
-	
+
 	@GetMapping(path = "/route-stop/{company}/{route}/{direction}")
-	public ManagedRouteStopListResponse getRouteStopListByCompanyAndRouteAndDirection(@PathVariable("company") String company,@PathVariable("route") String route,@PathVariable("direction") String direction) {
-		return managedManager.getRouteStopListByCompanyAndRouteAndDirection(company,route,direction);
+	public ManagedRouteStopListResponse getRouteStopListByCompanyAndRouteAndDirection(
+			@PathVariable("company") String company, @PathVariable("route") String route,
+			@PathVariable("direction") String direction) {
+		return managedManager.getRouteStopListByCompanyAndRouteAndDirection(company, route, direction);
 	}
-	
+
 	@GetMapping(path = "/route-detail/{company}/{route}/{direction}")
-	public ManagedRouteDetailResponse getRouteDetailByCompanyAndRouteAndDirection(@PathVariable("company") String company,@PathVariable("route") String route,@PathVariable("direction") String direction) {
-		return managedManager.getRouteDetailByCompanyAndRouteAndDirection(company,route,direction);
+	public ManagedRouteDetailResponse getRouteDetailByCompanyAndRouteAndDirection(
+			@PathVariable("company") String company, @PathVariable("route") String route,
+			@PathVariable("direction") String direction) {
+		return managedManager.getRouteDetailByCompanyAndRouteAndDirection(company, route, direction);
 	}
-	
+
 	@GetMapping(path = "/route-stop-eta/{company}/{stopId}/{route}/{direction}")
-	public ManagedRouteStopEtaResponse getRouteStopEtaByCompanyAndStopIdAndRouteAndDirection(@PathVariable("company") String company,@PathVariable("stopId") String stopId,@PathVariable("route") String route,@PathVariable("direction") String direction) {
+	public ManagedRouteStopEtaResponse getRouteStopEtaByCompanyAndStopIdAndRouteAndDirection(
+			@PathVariable("company") String company, @PathVariable("stopId") String stopId,
+			@PathVariable("route") String route, @PathVariable("direction") String direction) {
 		return managedManager.getRouteStopEtaByCompanyAndStopIdAndRouteAndDirection(company, stopId, route, direction);
 	}
-	
-	
+
 }
