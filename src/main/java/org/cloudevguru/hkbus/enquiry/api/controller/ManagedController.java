@@ -8,12 +8,14 @@ import org.cloudevguru.hkbus.enquiry.api.dto.managed.ManagedRouteStopListRespons
 import org.cloudevguru.hkbus.enquiry.api.dto.managed.ManagedStopResponse;
 import org.cloudevguru.hkbus.enquiry.api.manager.ManagedManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
 
+@CrossOrigin(origins =   "${cros.allow.origin}")
 @RestController
 @Api(value = "ctbnwfb-passthrough", description = "This API is to provide services for bus route of KMB, CTB and NWFB with uniformed path and response.")
 public class ManagedController {
