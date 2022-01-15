@@ -24,6 +24,12 @@ This project is to create APIs using uniformed request and response for the user
 
 Please feel free to visit the <a href="https://lightsail.cloudev.guru/hkbus-enquiry-api/swagger-ui/" target="_blank">Swagger UI</a> of the API to have a trial.
 
+<image src="https://hkbus-enquiry-web-cloudevhkguru.s3.ap-southeast-1.amazonaws.com/swagger_screencapture.png">
+
+We have also setup a <a href="https://hkbus-enquiry-web-cloudevhkguru.s3.ap-southeast-1.amazonaws.com/index.html" target="_blank">demo website</a> for the public to try the service.
+
+<image src="https://hkbus-enquiry-web-cloudevhkguru.s3.ap-southeast-1.amazonaws.com/website_screencapture.png">
+
 <p align="right">(<a href="#top">back to top</a>)</p>
 <!-- Reference -->
 
