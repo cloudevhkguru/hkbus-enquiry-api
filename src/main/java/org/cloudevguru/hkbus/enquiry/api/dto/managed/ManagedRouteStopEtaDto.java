@@ -9,6 +9,10 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ManagedRouteStopEtaDto {
+	
+	private String company;
+	
+	private String route;
 
 	private String destinationEn;
 
@@ -30,6 +34,22 @@ public class ManagedRouteStopEtaDto {
 	private String remarkTc;
 
 	private String remarkSc;
+	
+	public String getCompany() {
+		return company;
+	}
+
+	public void setCompany(String company) {
+		this.company = company;
+	}
+
+	public String getRoute() {
+		return route;
+	}
+
+	public void setRoute(String route) {
+		this.route = route;
+	}
 
 	public String getDestinationEn() {
 		return destinationEn;

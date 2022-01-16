@@ -254,7 +254,7 @@ public class ManagerTest {
 	@DisplayName("ManagedManager.getRouteStopEtaByCompanyAndStopIdAndRouteAndDirection Test KMB")
 	public void testGetRouteStopEtaByCompanyAndStopIdAndRouteAndDirectionKMB() throws Exception {
 		ManagedRouteStopEtaResponse response = managedManager.getRouteStopEtaByCompanyAndStopIdAndRouteAndDirection(BusCompanyEum.KMB.getValue(),UnitTestConfiguration.testKMB1AInboundStop(), UnitTestConfiguration.testKMBRoute1A(),DirectionFullEum.INBOUND.getValue());
-		List<ManagedRouteStopEtaDto> dtos = response.getRouteStopEtaDtos();
+		List<ManagedRouteStopEtaDto> dtos = response.getDtos();
 		assertThat(dtos.size()).isGreaterThan(0);
 		assertThat(dtos.get(0)).isNotNull();
 		assertThat(dtos.get(0).getDestinationEn()).isNotBlank();
@@ -325,7 +325,7 @@ public class ManagerTest {
 	@DisplayName("ManagedManager.getRouteStopEtaByCompanyAndStopIdAndRouteAndDirection Test CTB")
 	public void testGetRouteStopEtaByCompanyAndStopIdAndRouteAndDirectionCTB() throws Exception {
 		ManagedRouteStopEtaResponse response = managedManager.getRouteStopEtaByCompanyAndStopIdAndRouteAndDirection(BusCompanyEum.CTB.getValue(),UnitTestConfiguration.testCTBA29InboundStop(), UnitTestConfiguration.testCTBRouteA29(),DirectionFullEum.INBOUND.getValue());
-		List<ManagedRouteStopEtaDto> dtos = response.getRouteStopEtaDtos();
+		List<ManagedRouteStopEtaDto> dtos = response.getDtos();
 		assertThat(dtos.size()).isGreaterThan(0);
 		assertThat(dtos.get(0)).isNotNull();
 		assertThat(dtos.get(0).getDestinationEn()).isNotBlank();
@@ -384,7 +384,7 @@ public class ManagerTest {
 	@DisplayName("ManagedManager.getRouteStopEtaByCompanyAndStopIdAndRouteAndDirection Test NWFB")
 	public void testGetRouteStopEtaByCompanyAndStopIdAndRouteAndDirectionNWFB() throws Exception {
 		ManagedRouteStopEtaResponse response = managedManager.getRouteStopEtaByCompanyAndStopIdAndRouteAndDirection(BusCompanyEum.NWFB.getValue(),UnitTestConfiguration.testNWFB18OutboundStop(), UnitTestConfiguration.testNWFBRoute18(),DirectionFullEum.OUTBOUND.getValue());
-		List<ManagedRouteStopEtaDto> dtos = response.getRouteStopEtaDtos();
+		List<ManagedRouteStopEtaDto> dtos = response.getDtos();
 		assertThat(dtos.size()).isGreaterThan(0);
 		assertThat(dtos.get(0)).isNotNull();
 		assertThat(dtos.get(0).getDestinationEn()).isNotBlank();
