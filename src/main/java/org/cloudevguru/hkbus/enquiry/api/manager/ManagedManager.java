@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.cloudevguru.hkbus.enquiry.api.constants.BusEnquiryConstant.*;
+import org.cloudevguru.hkbus.enquiry.api.constants.CacheConstant;
 import org.cloudevguru.hkbus.enquiry.api.dto.ctbnwfb.v1.CTBNWFBv1RouteDto;
 import org.cloudevguru.hkbus.enquiry.api.dto.ctbnwfb.v1.CTBNWFBv1RouteListResponse;
 import org.cloudevguru.hkbus.enquiry.api.dto.ctbnwfb.v1.CTBNWFBv1RouteStopDto;
@@ -34,7 +35,9 @@ import org.cloudevguru.hkbus.enquiry.api.dto.managed.ManagedStopResponse;
 import org.cloudevguru.hkbus.enquiry.api.service.UtilityService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
+
 
 @Component
 public class ManagedManager {
@@ -52,6 +55,7 @@ public class ManagedManager {
 	private CTBNWFBManager ctbnwfbManager;
 
 	// route
+	@Cacheable(value=CacheConstant.MANAGED_ROUTE_LIST_CACHE,key="{#company,#route}")
 	public ManagedRouteListResponse getRouteListByCompanyAndRoute(String company, String route) {
 		utilityService.checkIsValidBusCompany(company);
 		ManagedRouteListResponse managedResponse = new ManagedRouteListResponse();
@@ -87,6 +91,7 @@ public class ManagedManager {
 		return managedResponse;
 	}
 
+	@Cacheable(value=CacheConstant.MANAGED_ROUTE_CACHE,key="{#company,#route,#direction}")
 	public ManagedRouteResponse getRouteByCompanyAndRouteAndDirection(String company, String route, String direction) {
 		utilityService.checkIsValidBusCompany(company);
 		String directionFull = utilityService.convertDirectionToFull(direction);
@@ -124,6 +129,7 @@ public class ManagedManager {
 	}
 
 	// Stop
+	@Cacheable(value=CacheConstant.MANAGED_STOP_CACHE,key="{#company,#stopId}")
 	public ManagedStopResponse getStopByCompanyAndStopId(String company, String stopId) {
 		utilityService.checkIsValidBusCompany(company);
 		ManagedStopResponse managedResponse = new ManagedStopResponse();
@@ -170,6 +176,7 @@ public class ManagedManager {
 	}
 
 	// Route Detail
+	@Cacheable(value=CacheConstant.MANAGED_ROUTE_DETAIL_CACHE,key="{#company,#route,#direction}")
 	public ManagedRouteDetailResponse getRouteDetailByCompanyAndRouteAndDirection(String company, String route,
 			String direction) {
 		ManagedRouteDetailResponse response = new ManagedRouteDetailResponse();
