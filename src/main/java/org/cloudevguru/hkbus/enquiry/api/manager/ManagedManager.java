@@ -199,8 +199,6 @@ public class ManagedManager {
 			String stopId, String route, String direction) {
 		utilityService.checkIsValidBusCompany(company);
 		ManagedRouteStopEtaResponse response = new ManagedRouteStopEtaResponse();
-		ManagedRouteResponse routeResponse = getRouteByCompanyAndRouteAndDirection(company, route, direction);
-		ManagedStopResponse stopResponse = getStopByCompanyAndStopId(company, stopId);
 		List<ManagedRouteStopEtaDto> routeStopEtaDtos = new ArrayList<ManagedRouteStopEtaDto>();
 		Date currenDate = new Date();
 		if (company.equalsIgnoreCase(BusCompanyEum.KMB.getValue())) {
@@ -235,9 +233,7 @@ public class ManagedManager {
 				routeStopEtaDtos.add(routeStopEtaDto);
 			}
 		}
-		response.setRouteDto(routeResponse.getDto());
-		response.setStopDto(stopResponse.getDto());
-		response.setRouteStopEtaDtos(routeStopEtaDtos);
+		response.setDtos(routeStopEtaDtos);
 		return response;
 	}
 
