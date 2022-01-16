@@ -29,7 +29,7 @@ import org.springframework.context.annotation.Import;
 
 @SpringBootTest
 @Import(UnitTestConfiguration.class)
-public class ServiceTest {
+public class ServiceTest extends BaseTestEntity {
 
 	@Autowired
 	private KMBService kmbService;

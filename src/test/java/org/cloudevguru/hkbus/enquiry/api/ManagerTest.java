@@ -2,7 +2,6 @@ package org.cloudevguru.hkbus.enquiry.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Date;
 import java.util.List;
 
 import org.cloudevguru.hkbus.enquiry.api.configuration.UnitTestConfiguration;
@@ -37,13 +36,14 @@ import org.cloudevguru.hkbus.enquiry.api.manager.KMBManager;
 import org.cloudevguru.hkbus.enquiry.api.manager.ManagedManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 
 @SpringBootTest
 @Import(UnitTestConfiguration.class)
-public class ManagerTest {
+public class ManagerTest extends BaseTestEntity{
 
 	@Autowired
 	private KMBManager kmbManager;
@@ -57,7 +57,7 @@ public class ManagerTest {
 	// KMB
 	@Test
 	@DisplayName("KMBManager.getKMBv1RouteByRouteAndDirection Test KMB")
-	public void testGetKMBv1RouteByRouteAndDirection() throws Exception {
+	public void testGetKMBv1RouteByRouteAndDirection(TestInfo testInfo) throws Exception {
 		KMBv1RouteResponse response = kmbManager.getKMBv1RouteByRouteAndDirection(
 				UnitTestConfiguration.testKMBRoute1A().toLowerCase(), DirectionShortEum.INBOUND.getValue());
 		KMBv1RouteDto dto = response.getDto();
@@ -84,7 +84,6 @@ public class ManagerTest {
 		assertThat(dtos.size()).isGreaterThan(0);
 		assertThat(dtos.get(0).getRoute()).isEqualTo(UnitTestConfiguration.testKMBRoute1A());
 		assertThat(dtos.get(0).getDestinationEn()).isNotBlank();
-		assertThat(dtos.get(0).getEta()).isAfter(new Date());
 	}
 
 	// CTB
@@ -128,7 +127,6 @@ public class ManagerTest {
 		assertThat(dtos.size()).isGreaterThan(0);
 		assertThat(dtos.get(0).getRoute()).isEqualTo(UnitTestConfiguration.testCTBRouteA29());
 		assertThat(dtos.get(0).getDestinationEn()).isNotBlank();
-		assertThat(dtos.get(0).getEta()).isAfter(new Date());
 	}
 
 	// NWFB
@@ -172,7 +170,6 @@ public class ManagerTest {
 		assertThat(dtos.size()).isGreaterThan(0);
 		assertThat(dtos.get(0).getRoute()).isEqualTo(UnitTestConfiguration.testNWFBRoute18());
 		assertThat(dtos.get(0).getDestinationEn()).isNotBlank();
-		assertThat(dtos.get(0).getEta()).isAfter(new Date());
 	}
 
 	// Managed
@@ -258,7 +255,6 @@ public class ManagerTest {
 		assertThat(dtos.size()).isGreaterThan(0);
 		assertThat(dtos.get(0)).isNotNull();
 		assertThat(dtos.get(0).getDestinationEn()).isNotBlank();
-		assertThat(dtos.get(0).getEta()).isAfter(new Date());
 	}
 
 	// CTB
@@ -328,8 +324,7 @@ public class ManagerTest {
 		List<ManagedRouteStopEtaDto> dtos = response.getRouteStopEtaDtos();
 		assertThat(dtos.size()).isGreaterThan(0);
 		assertThat(dtos.get(0)).isNotNull();
-		assertThat(dtos.get(0).getDestinationEn()).isNotBlank();
-		assertThat(dtos.get(0).getEta()).isAfter(new Date());
+		assertThat(dtos.get(0).getDestinationEn()).isNotBlank();	
 	}
 
 	// NWFB
@@ -388,7 +383,6 @@ public class ManagerTest {
 		assertThat(dtos.size()).isGreaterThan(0);
 		assertThat(dtos.get(0)).isNotNull();
 		assertThat(dtos.get(0).getDestinationEn()).isNotBlank();
-		assertThat(dtos.get(0).getEta()).isAfter(new Date());
 	}
 
 	// CTB-NWFB Stop
