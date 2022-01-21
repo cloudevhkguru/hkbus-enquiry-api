@@ -26,6 +26,10 @@ public class CTBNWFBManager {
 
 	// v1
 	// route
+	public CTBNWFBv1RouteListResponse getCTBNWFBv1AllRoutesByCompany(String company) {
+		return ctbnwfbService.getCTBNWFBv1AllRoutesByCompany(company.toUpperCase());
+	}
+	
 	public CTBNWFBv1RouteListResponse getCTBNWFBv1RouteListByCompanyAndRoute(String company, String route) {
 		CTBNWFBv1RouteListResponse response = new CTBNWFBv1RouteListResponse();
 		List<CTBNWFBv1RouteDto> dtos = new ArrayList<CTBNWFBv1RouteDto>();

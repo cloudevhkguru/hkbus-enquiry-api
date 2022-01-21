@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 public class CacheConstant {
 
 	// CTB & NWFB
+	public static final String MANAGED_ALL_ROUTE_LIST_CACHE = "managed-all-route-list-cache";
 	public static final String MANAGED_ROUTE_CACHE = "managed-route-cache";
 	public static final String MANAGED_STOP_CACHE = "managed-stop-cache";
 	public static final String MANAGED_ROUTE_LIST_CACHE = "managed-route-list-cache";

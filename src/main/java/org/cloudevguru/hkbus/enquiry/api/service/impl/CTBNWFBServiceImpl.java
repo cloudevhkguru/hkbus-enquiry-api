@@ -2,6 +2,7 @@ package org.cloudevguru.hkbus.enquiry.api.service.impl;
 
 import org.cloudevguru.hkbus.enquiry.api.constants.BusEnquiryConstant.*;
 import org.cloudevguru.hkbus.enquiry.api.dto.ctbnwfb.v1.CTBNWFBv1RouteDto;
+import org.cloudevguru.hkbus.enquiry.api.dto.ctbnwfb.v1.CTBNWFBv1RouteListResponse;
 import org.cloudevguru.hkbus.enquiry.api.dto.ctbnwfb.v1.CTBNWFBv1RouteResponse;
 import org.cloudevguru.hkbus.enquiry.api.dto.ctbnwfb.v1.CTBNWFBv1RouteStopEtaResponse;
 import org.cloudevguru.hkbus.enquiry.api.dto.ctbnwfb.v1.CTBNWFBv1RouteStopListResponse;
@@ -19,6 +20,11 @@ public class CTBNWFBServiceImpl implements CTBNWFBService {
 
 	// v1
 	// Route
+	@Override
+	public CTBNWFBv1RouteListResponse getCTBNWFBv1AllRoutesByCompany(String company) {
+		return ctbnwfbClient.getCTBNWFBv1AllRoutes(company);
+	}
+	
 	@Override
 	public CTBNWFBv1RouteResponse getCTBNWFBv1RouteByCompanyAndRoute(String company,String route) {
 		return ctbnwfbClient.getCTBNWFBv1Route(company,route);
