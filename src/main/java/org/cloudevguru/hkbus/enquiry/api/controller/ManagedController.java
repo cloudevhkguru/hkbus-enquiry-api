@@ -24,6 +24,11 @@ public class ManagedController {
 	private ManagedManager managedManager;
 
 	// route
+	@GetMapping(path = "/route")
+	public ManagedRouteListResponse getAllRouteList() {
+		return managedManager.getAllRoute();
+	}
+	
 	@GetMapping(path = "/route/{company}/{route}")
 	public ManagedRouteListResponse getRouteListByCompanyByRoute(@PathVariable("company") String company,
 			@PathVariable("route") String route) {
