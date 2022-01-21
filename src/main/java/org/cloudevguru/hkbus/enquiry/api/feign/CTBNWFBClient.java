@@ -1,5 +1,6 @@
 package org.cloudevguru.hkbus.enquiry.api.feign;
 
+import org.cloudevguru.hkbus.enquiry.api.dto.ctbnwfb.v1.CTBNWFBv1RouteListResponse;
 import org.cloudevguru.hkbus.enquiry.api.dto.ctbnwfb.v1.CTBNWFBv1RouteResponse;
 import org.cloudevguru.hkbus.enquiry.api.dto.ctbnwfb.v1.CTBNWFBv1RouteStopEtaResponse;
 import org.cloudevguru.hkbus.enquiry.api.dto.ctbnwfb.v1.CTBNWFBv1RouteStopListResponse;
@@ -14,6 +15,9 @@ public interface CTBNWFBClient {
 
 	// v1
 	// Route
+	@RequestMapping(method = RequestMethod.GET, value = "/v1.1/transport/citybus-nwfb/route/{company}")
+	CTBNWFBv1RouteListResponse getCTBNWFBv1AllRoutes(@PathVariable("company") String company);
+	
 	@RequestMapping(method = RequestMethod.GET, value = "/v1.1/transport/citybus-nwfb/route/{company}/{route}")
 	CTBNWFBv1RouteResponse getCTBNWFBv1Route(@PathVariable("company") String company,@PathVariable("route") String route);
 
