@@ -55,6 +55,27 @@ public class ManagedManager {
 	private CTBNWFBManager ctbnwfbManager;
 
 	// route
+	@Cacheable(value=CacheConstant.MANAGED_ALL_ROUTE_LIST_CACHE)
+	public ManagedRouteListResponse getAllRoute() {
+		ManagedRouteListResponse managedResponse = new ManagedRouteListResponse();
+		List<ManagedRouteDto> managedRouteDtos=new ArrayList<ManagedRouteDto>();
+		KMBv1RouteListResponse kmbv1RouteListResponse=kmbManager.getKMBv1RouteList();
+		List<KMBv1RouteDto> kmbRouteDtos=kmbv1RouteListResponse.getDtos();
+		for(KMBv1RouteDto kmbRoute:kmbRouteDtos) {
+			managedRouteDtos.add(convertKmbRouteDtoToManagedRouteDto(kmbRoute,null));
+		}
+		String[] companys= new String[] { BusCompanyEum.CTB.getValue(), BusCompanyEum.NWFB.getValue() };
+		for(String company:companys) {
+			CTBNWFBv1RouteListResponse ctbnwfbv1RouteListResponse=ctbnwfbManager.getCTBNWFBv1AllRoutesByCompany(company);
+			List<CTBNWFBv1RouteDto> ctbnwfbRouteDtos=ctbnwfbv1RouteListResponse.getDtos();
+			for(CTBNWFBv1RouteDto ctbnwfbRoute:ctbnwfbRouteDtos) {
+				managedRouteDtos.add(convertCtbnwfbRouteDtoToManagedRouteDto(ctbnwfbRoute, null));
+			}
+		}
+		managedResponse.setDtos(managedRouteDtos);
+		return managedResponse;
+	}
+	
 	@Cacheable(value=CacheConstant.MANAGED_ROUTE_LIST_CACHE,key="{#company,#route}")
 	public ManagedRouteListResponse getRouteListByCompanyAndRoute(String company, String route) {
 		utilityService.checkIsValidBusCompany(company);
@@ -67,10 +88,7 @@ public class ManagedManager {
 				isCircularRoute = true;
 			}
 			for (KMBv1RouteDto kmbRouteDto : kmbResponse.getDtos()) {
-				ManagedRouteDto managedRouteDto = modelMapper.map(kmbRouteDto, ManagedRouteDto.class);
-				managedRouteDto.setCompany(BusCompanyEum.KMB.getValue());
-				managedRouteDto.setIsCircularRoute(isCircularRoute);
-				managedRouteDtos.add(managedRouteDto);
+				managedRouteDtos.add(convertKmbRouteDtoToManagedRouteDto(kmbRouteDto, isCircularRoute));
 			}
 		} else {
 			CTBNWFBv1RouteListResponse ctbnwfbResponse = ctbnwfbManager.getCTBNWFBv1RouteListByCompanyAndRoute(company,
@@ -80,10 +98,7 @@ public class ManagedManager {
 					isCircularRoute = true;
 				}
 				for (CTBNWFBv1RouteDto ctbnwfbRouteDto : ctbnwfbResponse.getDtos()) {
-					ManagedRouteDto managedRouteDto = modelMapper.map(ctbnwfbRouteDto, ManagedRouteDto.class);
-					managedRouteDto.setCompany(company.toLowerCase());
-					managedRouteDto.setIsCircularRoute(isCircularRoute);
-					managedRouteDtos.add(managedRouteDto);
+					managedRouteDtos.add(convertCtbnwfbRouteDtoToManagedRouteDto(ctbnwfbRouteDto, isCircularRoute));
 				}
 			}
 		}
@@ -242,6 +257,20 @@ public class ManagedManager {
 		}
 		response.setDtos(routeStopEtaDtos);
 		return response;
+	}
+	
+	private ManagedRouteDto convertKmbRouteDtoToManagedRouteDto(KMBv1RouteDto kmbv1RouteDto, Boolean isCircularRoute) {
+		String company=BusCompanyEum.KMB.getValue().toLowerCase();
+		ManagedRouteDto managedRouteDto = modelMapper.map(kmbv1RouteDto, ManagedRouteDto.class);
+		managedRouteDto.setCompany(company);
+		managedRouteDto.setIsCircularRoute(isCircularRoute);
+		return managedRouteDto;
+	}
+	
+	private ManagedRouteDto convertCtbnwfbRouteDtoToManagedRouteDto(CTBNWFBv1RouteDto ctbnwfbv1RouteDto, Boolean isCircularRoute) {
+		ManagedRouteDto managedRouteDto = modelMapper.map(ctbnwfbv1RouteDto, ManagedRouteDto.class);
+		managedRouteDto.setIsCircularRoute(isCircularRoute);
+		return managedRouteDto;
 	}
 
 }
