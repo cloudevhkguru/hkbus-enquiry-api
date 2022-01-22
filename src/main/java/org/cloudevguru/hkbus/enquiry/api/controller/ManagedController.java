@@ -28,17 +28,26 @@ public class ManagedController {
 	public ManagedRouteListResponse getAllRouteList() {
 		return managedManager.getAllRoute();
 	}
-	
-	@GetMapping(path = "/route/{company}/{route}")
-	public ManagedRouteListResponse getRouteListByCompanyByRoute(@PathVariable("company") String company,
-			@PathVariable("route") String route) {
-		return managedManager.getRouteListByCompanyAndRoute(company, route);
+
+	@GetMapping(path = "/route/{route}")
+	public ManagedRouteListResponse getRouteListByRoute(@PathVariable("route") String route) {
+		return managedManager.getRouteByRoute(route);
 	}
 
-	@GetMapping(path = "/route/{company}/{route}/{direction}")
-	public ManagedRouteResponse getRouteByCompanyAndRouteAndDirection(@PathVariable("company") String company,
-			@PathVariable("route") String route, @PathVariable("direction") String direction) {
-		return managedManager.getRouteByCompanyAndRouteAndDirection(company, route, direction);
+	@GetMapping(path = "/route/{company}/{route}/{serviceType}")
+	public ManagedRouteListResponse getRouteListByCompanyByRouteAndServiceType(@PathVariable("company") String company,
+			@PathVariable("route") String route,
+			@PathVariable(name = "serviceType", required = false) String serviceType) {
+		return managedManager.getRouteListByCompanyAndRouteAndServiceType(company, route, serviceType);
+	}
+
+	@GetMapping(path = {"/route/{company}/{route}/{direction}/", "/route/{company}/{route}/{direction}/{serviceType}"})
+	public ManagedRouteResponse getRouteByCompanyAndRouteAndDirectionAndServiceType(
+			@PathVariable("company") String company, @PathVariable("route") String route,
+			@PathVariable("direction") String direction,
+			@PathVariable(name = "serviceType") String serviceType) {
+		return managedManager.getRouteByCompanyAndRouteAndDirectionAndServiceType(company, route, direction,
+				serviceType);
 	}
 
 	@GetMapping(path = "/stop/{company}/{stopId}")
@@ -47,25 +56,31 @@ public class ManagedController {
 		return managedManager.getStopByCompanyAndStopId(company, stopId);
 	}
 
-	@GetMapping(path = "/route-stop/{company}/{route}/{direction}")
-	public ManagedRouteStopListResponse getRouteStopListByCompanyAndRouteAndDirection(
+	@GetMapping(path = "/route-stop/{company}/{route}/{direction}/{serviceType}")
+	public ManagedRouteStopListResponse getRouteStopListByCompanyAndRouteAndDirectionAndServiceType(
 			@PathVariable("company") String company, @PathVariable("route") String route,
-			@PathVariable("direction") String direction) {
-		return managedManager.getRouteStopListByCompanyAndRouteAndDirection(company, route, direction);
+			@PathVariable("direction") String direction,
+			@PathVariable(name = "serviceType", required = false) String serviceType) {
+		return managedManager.getRouteStopListByCompanyAndRouteAndDirectionAndServiceType(company, route, direction,
+				serviceType);
 	}
 
-	@GetMapping(path = "/route-detail/{company}/{route}/{direction}")
-	public ManagedRouteDetailResponse getRouteDetailByCompanyAndRouteAndDirection(
+	@GetMapping(path = "/route-detail/{company}/{route}/{direction}/{serviceType}")
+	public ManagedRouteDetailResponse getRouteDetailByCompanyAndRouteAndDirectionAndServiceType(
 			@PathVariable("company") String company, @PathVariable("route") String route,
-			@PathVariable("direction") String direction) {
-		return managedManager.getRouteDetailByCompanyAndRouteAndDirection(company, route, direction);
+			@PathVariable("direction") String direction,
+			@PathVariable(name = "serviceType", required = false) String serviceType) {
+		return managedManager.getRouteDetailByCompanyAndRouteAndDirectionAndServiceType(company, route, direction,
+				serviceType);
 	}
 
-	@GetMapping(path = "/route-stop-eta/{company}/{stopId}/{route}/{direction}")
-	public ManagedRouteStopEtaResponse getRouteStopEtaByCompanyAndStopIdAndRouteAndDirection(
+	@GetMapping(path = "/route-stop-eta/{company}/{stopId}/{route}/{direction}/{serviceType}")
+	public ManagedRouteStopEtaResponse getRouteStopEtaByCompanyAndStopIdAndRouteAndDirectionAndServiceType(
 			@PathVariable("company") String company, @PathVariable("stopId") String stopId,
-			@PathVariable("route") String route, @PathVariable("direction") String direction) {
-		return managedManager.getRouteStopEtaByCompanyAndStopIdAndRouteAndDirection(company, stopId, route, direction);
+			@PathVariable("route") String route, @PathVariable("direction") String direction,
+			@PathVariable(name = "serviceType", required = false) String serviceType) {
+		return managedManager.getRouteStopEtaByCompanyAndStopIdAndRouteAndDirectionAndServiceType(company, stopId,
+				route, direction, serviceType);
 	}
 
 }

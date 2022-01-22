@@ -3,6 +3,7 @@ package org.cloudevguru.hkbus.enquiry.api.manager;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.cloudevguru.hkbus.enquiry.api.constants.BusEnquiryConstant.*;
 import org.cloudevguru.hkbus.enquiry.api.constants.CacheConstant;
@@ -76,14 +77,14 @@ public class ManagedManager {
 		return managedResponse;
 	}
 	
-	@Cacheable(value=CacheConstant.MANAGED_ROUTE_LIST_CACHE,key="{#company,#route}")
-	public ManagedRouteListResponse getRouteListByCompanyAndRoute(String company, String route) {
+	@Cacheable(value=CacheConstant.MANAGED_ROUTE_LIST_CACHE,key="{#company,#route,#serviceType}")
+	public ManagedRouteListResponse getRouteListByCompanyAndRouteAndServiceType(String company, String route,String serviceType) {
 		utilityService.checkIsValidBusCompany(company);
 		ManagedRouteListResponse managedResponse = new ManagedRouteListResponse();
 		List<ManagedRouteDto> managedRouteDtos = new ArrayList<ManagedRouteDto>();
 		Boolean isCircularRoute = false;
 		if (company.equalsIgnoreCase(BusCompanyEum.KMB.getValue())) {
-			KMBv1RouteListResponse kmbResponse = kmbManager.getKMBv1RouteListByRoute(route);
+			KMBv1RouteListResponse kmbResponse = kmbManager.getKMBv1RouteListByRouteAndServiceType(route,serviceType);
 			if (kmbResponse.getDtos().size() == 1) {
 				isCircularRoute = true;
 			}
@@ -106,12 +107,12 @@ public class ManagedManager {
 		return managedResponse;
 	}
 
-	@Cacheable(value=CacheConstant.MANAGED_ROUTE_CACHE,key="{#company,#route,#direction}")
-	public ManagedRouteResponse getRouteByCompanyAndRouteAndDirection(String company, String route, String direction) {
+	@Cacheable(value=CacheConstant.MANAGED_ROUTE_CACHE,key="{#company,#route,#direction,#serviceType}")
+	public ManagedRouteResponse getRouteByCompanyAndRouteAndDirectionAndServiceType(String company, String route, String direction,String serviceType) {
 		utilityService.checkIsValidBusCompany(company);
 		String directionFull = utilityService.convertDirectionToFull(direction);
 		ManagedRouteResponse managedResponse = new ManagedRouteResponse();
-		ManagedRouteListResponse managedRouteListResponse = getRouteListByCompanyAndRoute(company, route);
+		ManagedRouteListResponse managedRouteListResponse = getRouteListByCompanyAndRouteAndServiceType(company, route,serviceType);
 		ManagedRouteDto managedRouteDto = null;
 		if (managedRouteListResponse.getDtos().size() == 2) {
 			// If have both inbound and outbound, then get the managedRouteDto matching
@@ -142,6 +143,20 @@ public class ManagedManager {
 		managedResponse.setDto(managedRouteDto);
 		return managedResponse;
 	}
+	
+	@Cacheable(value=CacheConstant.MANAGED_ROUTE_LIST_BY_ROUTE_CACHE)
+	public ManagedRouteListResponse getRouteByRoute(String route) {
+		ManagedRouteListResponse managedResponse = new ManagedRouteListResponse();
+		List<ManagedRouteDto> allRouteList=getAllRoute().getDtos();
+		List<ManagedRouteDto> filteredRouteList=allRouteList
+				.stream()
+				.filter(routeDto->routeDto.getRoute().toUpperCase().contains(route.toUpperCase()))
+				.collect(Collectors.toList());
+		managedResponse.setDtos(filteredRouteList);
+		return managedResponse;
+	}
+	
+	
 
 	// Stop
 	@Cacheable(value=CacheConstant.MANAGED_STOP_CACHE,key="{#company,#stopId}")
@@ -163,14 +178,14 @@ public class ManagedManager {
 	}
 
 	// RouteStop
-	public ManagedRouteStopListResponse getRouteStopListByCompanyAndRouteAndDirection(String company, String route,
-			String direction) {
+	public ManagedRouteStopListResponse getRouteStopListByCompanyAndRouteAndDirectionAndServiceType(String company, String route,
+			String direction,String serviceType) {
 		utilityService.checkIsValidBusCompany(company);
 		ManagedRouteStopListResponse managedResponse = new ManagedRouteStopListResponse();
 		List<ManagedRouteStopDto> managedRouteStopDtos = new ArrayList<ManagedRouteStopDto>();
 		if (company.equalsIgnoreCase(BusCompanyEum.KMB.getValue())) {
-			KMBv1RouteStopListResponse kmbResponse = kmbManager.getKMBv1RouteStopListByRouteAndDirection(route,
-					direction);
+			KMBv1RouteStopListResponse kmbResponse = kmbManager.getKMBv1RouteStopListByRouteAndDirectionAndServiceType(route,
+					direction,serviceType);
 			for (KMBv1RouteStopDto kmbRouteStopDto : kmbResponse.getDtos()) {
 				ManagedRouteStopDto managedRouteStopDto = modelMapper.map(kmbRouteStopDto, ManagedRouteStopDto.class);
 				managedRouteStopDto.setCompany(BusCompanyEum.KMB.getValue());
@@ -191,16 +206,16 @@ public class ManagedManager {
 	}
 
 	// Route Detail
-	@Cacheable(value=CacheConstant.MANAGED_ROUTE_DETAIL_CACHE,key="{#company,#route,#direction}")
-	public ManagedRouteDetailResponse getRouteDetailByCompanyAndRouteAndDirection(String company, String route,
-			String direction) {
+	@Cacheable(value=CacheConstant.MANAGED_ROUTE_DETAIL_CACHE,key="{#company,#route,#direction,#serviceType}")
+	public ManagedRouteDetailResponse getRouteDetailByCompanyAndRouteAndDirectionAndServiceType(String company, String route,
+			String direction,String serviceType) {
 		ManagedRouteDetailResponse response = new ManagedRouteDetailResponse();
-		ManagedRouteDto managedRouteDto = getRouteByCompanyAndRouteAndDirection(company, route, direction).getDto();
+		ManagedRouteDto managedRouteDto = getRouteByCompanyAndRouteAndDirectionAndServiceType(company, route, direction,serviceType).getDto();
 		if (managedRouteDto != null) {
 			String directionFull = utilityService.convertDirectionToFull(managedRouteDto.getBound());
 			ManagedRouteDetailDto manageRouteDetailDto = modelMapper.map(managedRouteDto, ManagedRouteDetailDto.class);
-			List<ManagedRouteStopDto> managedRouteStopDtos = getRouteStopListByCompanyAndRouteAndDirection(company,
-					route, directionFull).getDtos();
+			List<ManagedRouteStopDto> managedRouteStopDtos = getRouteStopListByCompanyAndRouteAndDirectionAndServiceType(company,
+					route, directionFull,serviceType).getDtos();
 			List<ManagedStopDetailDto> managedStopDetailDtos = new ArrayList<ManagedStopDetailDto>();
 			for (ManagedRouteStopDto managedRouteStopDto : managedRouteStopDtos) {
 				ManagedStopDto managedStopDto = getStopByCompanyAndStopId(company, managedRouteStopDto.getStop())
@@ -217,15 +232,15 @@ public class ManagedManager {
 	}
 
 	// Route Stop ETA
-	public ManagedRouteStopEtaResponse getRouteStopEtaByCompanyAndStopIdAndRouteAndDirection(String company,
-			String stopId, String route, String direction) {
+	public ManagedRouteStopEtaResponse getRouteStopEtaByCompanyAndStopIdAndRouteAndDirectionAndServiceType(String company,
+			String stopId, String route, String direction,String serviceType) {
 		utilityService.checkIsValidBusCompany(company);
 		ManagedRouteStopEtaResponse response = new ManagedRouteStopEtaResponse();
 		List<ManagedRouteStopEtaDto> routeStopEtaDtos = new ArrayList<ManagedRouteStopEtaDto>();
 		Date currenDate = new Date();
 		if (company.equalsIgnoreCase(BusCompanyEum.KMB.getValue())) {
 			KMBv1RouteStopEtaResponse kmbV1RouteStopEtaResponse = kmbManager
-					.getKMBv1RouteStopEtaByRouteAndStopId(stopId, route);
+					.getKMBv1RouteStopEtaByRouteAndStopIdAndServiceType(stopId, route, serviceType);
 			List<KMBv1RouteStopEtaDto> kmbRouteStopEtaDtos = kmbV1RouteStopEtaResponse.getDtos();
 			for (KMBv1RouteStopEtaDto kmbRouteStopEtaDto : kmbRouteStopEtaDtos) {
 				ManagedRouteStopEtaDto routeStopEtaDto = modelMapper.map(kmbRouteStopEtaDto,
@@ -260,7 +275,7 @@ public class ManagedManager {
 	}
 	
 	private ManagedRouteDto convertKmbRouteDtoToManagedRouteDto(KMBv1RouteDto kmbv1RouteDto, Boolean isCircularRoute) {
-		String company=BusCompanyEum.KMB.getValue().toLowerCase();
+		String company=BusCompanyEum.KMB.getValue().toUpperCase();
 		ManagedRouteDto managedRouteDto = modelMapper.map(kmbv1RouteDto, ManagedRouteDto.class);
 		managedRouteDto.setCompany(company);
 		managedRouteDto.setIsCircularRoute(isCircularRoute);
