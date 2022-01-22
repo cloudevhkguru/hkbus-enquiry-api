@@ -152,6 +152,25 @@ public class ManagedManager {
 				.stream()
 				.filter(routeDto->routeDto.getRoute().toUpperCase().contains(route.toUpperCase()))
 				.collect(Collectors.toList());
+		List<ManagedRouteDto> additionalRouteList=new ArrayList<ManagedRouteDto>();
+		List<ManagedRouteDto> removalRouteList=new ArrayList<ManagedRouteDto>();
+		for(ManagedRouteDto routeDto:filteredRouteList) {
+			if(routeDto.getBound()==null) {
+				String company2=routeDto.getCompany();
+				String route2=routeDto.getRoute();
+				List<ManagedRouteDto> additionalManagedRouteDtos=getRouteListByCompanyAndRouteAndServiceType(company2, route2, null).getDtos();
+				for(ManagedRouteDto additioManagedRouteDto:additionalManagedRouteDtos) {
+					additionalRouteList.add(additioManagedRouteDto);
+				}
+				removalRouteList.add(routeDto);
+			}
+		}
+		for(ManagedRouteDto addDto:additionalRouteList) {
+			filteredRouteList.add(addDto);
+		}
+		for(ManagedRouteDto removalDto:removalRouteList) {
+			filteredRouteList.remove(removalDto);
+		}
 		managedResponse.setDtos(filteredRouteList);
 		return managedResponse;
 	}
