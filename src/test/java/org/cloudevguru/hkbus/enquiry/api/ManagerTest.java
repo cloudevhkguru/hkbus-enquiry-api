@@ -1,6 +1,7 @@
 package org.cloudevguru.hkbus.enquiry.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Date;
 import java.util.List;
@@ -43,7 +44,7 @@ import org.springframework.context.annotation.Import;
 
 @SpringBootTest
 @Import(UnitTestConfiguration.class)
-public class ManagerTest {
+public class ManagerTest extends BaseTestEntity {
 
 	@Autowired
 	private KMBManager kmbManager;
@@ -53,37 +54,38 @@ public class ManagerTest {
 
 	@Autowired
 	private ManagedManager managedManager;
-	
+
 	// KMB
 	@Test
-	@DisplayName("KMBManager.getKMBv1RouteByRouteAndDirection Test KMB")
-	public void testGetKMBv1RouteByRouteAndDirection() throws Exception {
-		KMBv1RouteResponse response = kmbManager.getKMBv1RouteByRouteAndDirection(
-				UnitTestConfiguration.testKMBRoute1A().toLowerCase(), DirectionShortEum.INBOUND.getValue());
+	@DisplayName("KMBManager.getKMBv1RouteByRouteAndDirectionAndServiceType Test KMB")
+	public void testgetKMBv1RouteByRouteAndDirectionAndServiceType() throws Exception {
+		KMBv1RouteResponse response = kmbManager.getKMBv1RouteByRouteAndDirectionAndServiceType(
+				UnitTestConfiguration.testKMBRoute1A().toLowerCase(), DirectionShortEum.INBOUND.getValue(), "1");
 		KMBv1RouteDto dto = response.getDto();
 		assertThat(dto.getBound()).isEqualTo(DirectionShortEum.INBOUND.getValue());
 		assertThat(dto.getOriginEn()).isNotEmpty();
 	}
 
 	@Test
-	@DisplayName("KMBManager.getKMBv1RouteStopListByRouteAndDirection Test KMB")
-	public void testGetKMBv1RouteStopListByRouteAndDirection() throws Exception {
-		KMBv1RouteStopListResponse response = kmbManager.getKMBv1RouteStopListByRouteAndDirection(
-				UnitTestConfiguration.testKMBRoute101(), DirectionShortEum.OUTBOUND.getValue());
+	@DisplayName("KMBManager.getKMBv1RouteStopListByRouteAndDirectionAndServiceType Test KMB")
+	public void testgetKMBv1RouteStopListByRouteAndDirectionAndServiceType() throws Exception {
+		KMBv1RouteStopListResponse response = kmbManager.getKMBv1RouteStopListByRouteAndDirectionAndServiceType(
+				UnitTestConfiguration.testKMBRoute101(), DirectionShortEum.OUTBOUND.getValue(), "1");
 		List<KMBv1RouteStopDto> dtos = response.getDtos();
 		assertThat(dtos.size()).isGreaterThan(0);
 		assertThat(dtos.get(1).getRoute()).isEqualTo(UnitTestConfiguration.testKMBRoute101());
 		assertThat(dtos.get(2).getStop()).isNotBlank();
 	}
-	
+
 	@Test
 	@DisplayName("KMBManager.getKMBv1RouteStopEtaByRouteAndStopId Test KMB")
 	public void testGetKMBv1RouteStopEtaByRouteAndStopId() throws Exception {
-		KMBv1RouteStopEtaResponse response = kmbManager.getKMBv1RouteStopEtaByRouteAndStopId(UnitTestConfiguration.testKMB1AInboundStop(), UnitTestConfiguration.testKMBRoute1A());
+		KMBv1RouteStopEtaResponse response = kmbManager.getKMBv1RouteStopEtaByRouteAndStopIdAndServiceType(
+				UnitTestConfiguration.testKMB1AInboundStop(), UnitTestConfiguration.testKMBRoute1A(), "1");
 		List<KMBv1RouteStopEtaDto> dtos = response.getDtos();
-		//assertThat(dtos.size()).isGreaterThan(0);
-		//assertThat(dtos.get(0).getRoute()).isEqualTo(UnitTestConfiguration.testKMBRoute1A());
-		//assertThat(dtos.get(0).getDestinationEn()).isNotBlank();
+		// assertThat(dtos.size()).isGreaterThan(0);
+		// assertThat(dtos.get(0).getRoute()).isEqualTo(UnitTestConfiguration.testKMBRoute1A());
+		// assertThat(dtos.get(0).getDestinationEn()).isNotBlank();
 	}
 
 	// CTB
@@ -108,7 +110,7 @@ public class ManagerTest {
 	}
 
 	@Test
-	@DisplayName("CTBNWFBManager.getKMBv1RouteStopListByRouteAndDirection Test CTB")
+	@DisplayName("CTBNWFBManager.getKMBv1RouteStopListByRouteAndDirectionAndServiceType Test CTB")
 	public void testGetCTBNWFBv1RouteStopListByCompanyAndRouteAndDirectionCTB() throws Exception {
 		CTBNWFBv1RouteStopListResponse response = ctbnwfbManager.getCTBNWFBv1RouteStopListByCompanyAndRouteAndDirection(
 				BusCompanyEum.CTB.getValue(), UnitTestConfiguration.testCTBRouteA29(),
@@ -118,15 +120,17 @@ public class ManagerTest {
 		assertThat(dtos.get(1).getRoute()).isEqualTo(UnitTestConfiguration.testCTBRouteA29());
 		assertThat(dtos.get(2).getStop()).isNotBlank();
 	}
-	
+
 	@Test
 	@DisplayName("CTBNWFBManager.getCTBNWFBv1RouteStopEtaByCompanyAndStopIdAndRoute Test CTB")
 	public void testGetCTBNWFBv1RouteStopEtaByCompanyAndStopIdAndRouteCTB() throws Exception {
-		CTBNWFBv1RouteStopEtaResponse response = ctbnwfbManager.getCTBNWFBv1RouteStopEtaByCompanyAndStopIdAndRoute(BusCompanyEum.CTB.getValue(), UnitTestConfiguration.testCTBA29InboundStop(), UnitTestConfiguration.testCTBRouteA29());
+		CTBNWFBv1RouteStopEtaResponse response = ctbnwfbManager.getCTBNWFBv1RouteStopEtaByCompanyAndStopIdAndRoute(
+				BusCompanyEum.CTB.getValue(), UnitTestConfiguration.testCTBA29InboundStop(),
+				UnitTestConfiguration.testCTBRouteA29());
 		List<CTBNWFBv1RouteStopEtaDto> dtos = response.getDtos();
-		//assertThat(dtos.size()).isGreaterThan(0);
-		//assertThat(dtos.get(0).getRoute()).isEqualTo(UnitTestConfiguration.testCTBRouteA29());
-		//assertThat(dtos.get(0).getDestinationEn()).isNotBlank();
+		// assertThat(dtos.size()).isGreaterThan(0);
+		// assertThat(dtos.get(0).getRoute()).isEqualTo(UnitTestConfiguration.testCTBRouteA29());
+		// assertThat(dtos.get(0).getDestinationEn()).isNotBlank();
 	}
 
 	// NWFB
@@ -151,7 +155,7 @@ public class ManagerTest {
 	}
 
 	@Test
-	@DisplayName("CTBNWFBManager.getKMBv1RouteStopListByRouteAndDirection Test NWFB")
+	@DisplayName("CTBNWFBManager.getKMBv1RouteStopListByRouteAndDirectionAndServiceType Test NWFB")
 	public void testGetCTBNWFBv1RouteStopListByCompanyAndRouteAndDirectionNWFB() throws Exception {
 		CTBNWFBv1RouteStopListResponse response = ctbnwfbManager.getCTBNWFBv1RouteStopListByCompanyAndRouteAndDirection(
 				BusCompanyEum.NWFB.getValue(), UnitTestConfiguration.testNWFBRoute15C(),
@@ -161,35 +165,37 @@ public class ManagerTest {
 		assertThat(dtos.get(1).getRoute()).isEqualTo(UnitTestConfiguration.testNWFBRoute15C());
 		assertThat(dtos.get(2).getStop()).isNotBlank();
 	}
-	
+
 	@Test
 	@DisplayName("CTBNWFBManager.getCTBNWFBv1RouteStopEtaByCompanyAndStopIdAndRoute Test NWFB")
 	public void testGetCTBNWFBv1RouteStopEtaByCompanyAndStopIdAndRouteNWFB() throws Exception {
-		CTBNWFBv1RouteStopEtaResponse response = ctbnwfbManager.getCTBNWFBv1RouteStopEtaByCompanyAndStopIdAndRoute(BusCompanyEum.NWFB.getValue(), UnitTestConfiguration.testNWFB18OutboundStop(), UnitTestConfiguration.testNWFBRoute18());
+		CTBNWFBv1RouteStopEtaResponse response = ctbnwfbManager.getCTBNWFBv1RouteStopEtaByCompanyAndStopIdAndRoute(
+				BusCompanyEum.NWFB.getValue(), UnitTestConfiguration.testNWFB18OutboundStop(),
+				UnitTestConfiguration.testNWFBRoute18());
 		List<CTBNWFBv1RouteStopEtaDto> dtos = response.getDtos();
-		//assertThat(dtos.size()).isGreaterThan(0);
-		//assertThat(dtos.get(0).getRoute()).isEqualTo(UnitTestConfiguration.testNWFBRoute18());
-		//assertThat(dtos.get(0).getDestinationEn()).isNotBlank();
+		// assertThat(dtos.size()).isGreaterThan(0);
+		// assertThat(dtos.get(0).getRoute()).isEqualTo(UnitTestConfiguration.testNWFBRoute18());
+		// assertThat(dtos.get(0).getDestinationEn()).isNotBlank();
 	}
 
 	// Managed
 	// KMB
 	@Test
-	@DisplayName("ManagedManager.getRouteListByCompanyAndRoute Test KMB")
+	@DisplayName("ManagedManager.getRouteListByCompanyAndRouteAndServiceType Test KMB")
 	public void testGetRouteListByCompanyAndRouteKMB() throws Exception {
-		ManagedRouteListResponse response = managedManager.getRouteListByCompanyAndRoute(BusCompanyEum.KMB.getValue(),
-				UnitTestConfiguration.testKMBRoute101());
+		ManagedRouteListResponse response = managedManager.getRouteListByCompanyAndRouteAndServiceType(
+				BusCompanyEum.KMB.getValue(), UnitTestConfiguration.testKMBRoute101(), "1");
 		List<ManagedRouteDto> dtos = response.getDtos();
 		assertThat(dtos.size()).isGreaterThan(0);
 		assertThat(dtos.get(1).getRoute()).isEqualTo(UnitTestConfiguration.testKMBRoute101());
 	}
 
 	@Test
-	@DisplayName("ManagedManager.getRouteByCompanyAndRouteAndDirection Test KMB")
+	@DisplayName("ManagedManager.getRouteByCompanyAndRouteAndDirectionAndServiceType Test KMB")
 	public void testGetRouteByCompanyAndRouteAndDirectionKMB() throws Exception {
-		ManagedRouteResponse response = managedManager.getRouteByCompanyAndRouteAndDirection(
+		ManagedRouteResponse response = managedManager.getRouteByCompanyAndRouteAndDirectionAndServiceType(
 				BusCompanyEum.KMB.getValue(), UnitTestConfiguration.testKMBRoute1A(),
-				DirectionShortEum.INBOUND.getValue());
+				DirectionShortEum.INBOUND.getValue(), "1");
 		ManagedRouteDto dto = response.getDto();
 		assertThat(dto.getOriginEn()).isNotBlank();
 		assertThat(dto.getRoute()).isEqualTo(UnitTestConfiguration.testKMBRoute1A());
@@ -206,11 +212,11 @@ public class ManagerTest {
 	}
 
 	@Test
-	@DisplayName("ManagedManager.getRouteStopListByCompanyAndRouteAndDirection Test")
+	@DisplayName("ManagedManager.getRouteStopListByCompanyAndRouteAndDirectionAndServiceType Test")
 	public void testGetRouteStopListByCompanyAndRouteAndDirectionKMB() throws Exception {
-		ManagedRouteStopListResponse response = managedManager.getRouteStopListByCompanyAndRouteAndDirection(
-				BusCompanyEum.KMB.getValue(), UnitTestConfiguration.testKMBRoute101(),
-				DirectionShortEum.OUTBOUND.getValue());
+		ManagedRouteStopListResponse response = managedManager
+				.getRouteStopListByCompanyAndRouteAndDirectionAndServiceType(BusCompanyEum.KMB.getValue(),
+						UnitTestConfiguration.testKMBRoute101(), DirectionShortEum.OUTBOUND.getValue(), "1");
 		List<ManagedRouteStopDto> dtos = response.getDtos();
 		assertThat(dtos.size()).isGreaterThan(0);
 		assertThat(dtos.get(1).getRoute()).isEqualTo(UnitTestConfiguration.testKMBRoute101());
@@ -218,11 +224,11 @@ public class ManagerTest {
 	}
 
 	@Test
-	@DisplayName("ManagedManager.getRouteDetailByCompanyAndRouteAndDirection Test KMB")
+	@DisplayName("ManagedManager.getRouteDetailByCompanyAndRouteAndDirectionAndServiceType Test KMB")
 	public void testGetRouteDetailByCompanyAndRouteAndDirectionKMB() throws Exception {
-		ManagedRouteDetailResponse response = managedManager.getRouteDetailByCompanyAndRouteAndDirection(
+		ManagedRouteDetailResponse response = managedManager.getRouteDetailByCompanyAndRouteAndDirectionAndServiceType(
 				BusCompanyEum.KMB.getValue(), UnitTestConfiguration.testKMBRoute101(),
-				DirectionShortEum.OUTBOUND.getValue());
+				DirectionShortEum.OUTBOUND.getValue(), "1");
 		ManagedRouteDetailDto dto = response.getDto();
 		List<ManagedStopDetailDto> stopDetailDtos = dto.getStopDetailDtos();
 		assertThat(dto.getBound()).isEqualToIgnoringCase(DirectionShortEum.OUTBOUND.getValue());
@@ -233,11 +239,11 @@ public class ManagerTest {
 	}
 
 	@Test
-	@DisplayName("ManagedManager.getRouteDetailByCompanyAndRouteAndDirection Test KMB CircularRoute")
+	@DisplayName("ManagedManager.getRouteDetailByCompanyAndRouteAndDirectionAndServiceType Test KMB CircularRoute")
 	public void testGetRouteDetailByCompanyAndRouteAndDirectionKMBCircularRoute() throws Exception {
-		ManagedRouteDetailResponse response = managedManager.getRouteDetailByCompanyAndRouteAndDirection(
+		ManagedRouteDetailResponse response = managedManager.getRouteDetailByCompanyAndRouteAndDirectionAndServiceType(
 				BusCompanyEum.KMB.getValue(), UnitTestConfiguration.testKMBCircularRoute27(),
-				DirectionShortEum.INBOUND.getValue());
+				DirectionShortEum.INBOUND.getValue(), "1");
 		ManagedRouteDetailDto dto = response.getDto();
 		List<ManagedStopDetailDto> stopDetailDtos = dto.getStopDetailDtos();
 		assertThat(dto.getBound()).isEqualToIgnoringCase(DirectionShortEum.OUTBOUND.getValue());
@@ -246,45 +252,48 @@ public class ManagerTest {
 		assertThat(stopDetailDtos.get(2).getSeq()).isNotNull();
 		assertThat(stopDetailDtos.get(3).getStopDto().getNameEn()).isNotNull();
 	}
-	
+
 	@Test
 	@DisplayName("ManagedManager.getRouteStopEtaByCompanyAndStopIdAndRouteAndDirection Test KMB")
 	public void testGetRouteStopEtaByCompanyAndStopIdAndRouteAndDirectionKMB() throws Exception {
-		ManagedRouteStopEtaResponse response = managedManager.getRouteStopEtaByCompanyAndStopIdAndRouteAndDirection(BusCompanyEum.KMB.getValue(),UnitTestConfiguration.testKMB1AInboundStop(), UnitTestConfiguration.testKMBRoute1A(),DirectionFullEum.INBOUND.getValue());
+		ManagedRouteStopEtaResponse response = managedManager
+				.getRouteStopEtaByCompanyAndStopIdAndRouteAndDirectionAndServiceType(BusCompanyEum.KMB.getValue(),
+						UnitTestConfiguration.testKMB1AInboundStop(), UnitTestConfiguration.testKMBRoute1A(),
+						DirectionFullEum.INBOUND.getValue(), "1");
 		List<ManagedRouteStopEtaDto> dtos = response.getDtos();
-		//assertThat(dtos.size()).isGreaterThan(0);
-		//assertThat(dtos.get(0)).isNotNull();
-		//assertThat(dtos.get(0).getDestinationEn()).isNotBlank();
+		// assertThat(dtos.size()).isGreaterThan(0);
+		// assertThat(dtos.get(0)).isNotNull();
+		// assertThat(dtos.get(0).getDestinationEn()).isNotBlank();
 	}
 
 	// CTB
 	@Test
-	@DisplayName("ManagedManager.getRouteListByCompanyAndRoute Test CTB")
+	@DisplayName("ManagedManager.getRouteListByCompanyAndRouteAndServiceType Test CTB")
 	public void testGetRouteListByCompanyAndRouteCTB() throws Exception {
-		ManagedRouteListResponse response = managedManager.getRouteListByCompanyAndRoute(BusCompanyEum.CTB.getValue(),
-				UnitTestConfiguration.testCTBRouteA29());
+		ManagedRouteListResponse response = managedManager.getRouteListByCompanyAndRouteAndServiceType(
+				BusCompanyEum.CTB.getValue(), UnitTestConfiguration.testCTBRouteA29(), null);
 		List<ManagedRouteDto> dtos = response.getDtos();
 		assertThat(dtos.size()).isGreaterThan(0);
 		assertThat(dtos.get(1).getRoute()).isEqualTo(UnitTestConfiguration.testCTBRouteA29());
 	}
 
 	@Test
-	@DisplayName("ManagedManager.getRouteByCompanyAndRouteAndDirection Test CTB")
+	@DisplayName("ManagedManager.getRouteByCompanyAndRouteAndDirectionAndServiceType Test CTB")
 	public void testGetRouteByCompanyAndRouteAndDirectionCTB() throws Exception {
-		ManagedRouteResponse response = managedManager.getRouteByCompanyAndRouteAndDirection(
+		ManagedRouteResponse response = managedManager.getRouteByCompanyAndRouteAndDirectionAndServiceType(
 				BusCompanyEum.CTB.getValue(), UnitTestConfiguration.testCTBRoute671(),
-				DirectionShortEum.OUTBOUND.getValue());
+				DirectionShortEum.OUTBOUND.getValue(), null);
 		ManagedRouteDto dto = response.getDto();
 		assertThat(dto.getOriginEn()).isNotBlank();
 		assertThat(dto.getRoute()).isEqualTo(UnitTestConfiguration.testCTBRoute671());
 	}
 
 	@Test
-	@DisplayName("ManagedManager.getRouteByCompanyAndRouteAndDirection Test CTB Circular Route")
+	@DisplayName("ManagedManager.getRouteByCompanyAndRouteAndDirectionAndServiceType Test CTB Circular Route")
 	public void testGetRouteByCompanyAndRouteAndDirectionCTBCircularRoute() throws Exception {
-		ManagedRouteResponse response = managedManager.getRouteByCompanyAndRouteAndDirection(
+		ManagedRouteResponse response = managedManager.getRouteByCompanyAndRouteAndDirectionAndServiceType(
 				BusCompanyEum.CTB.getValue(), UnitTestConfiguration.testCTBCircularRoute12A(),
-				DirectionShortEum.INBOUND.getValue());
+				DirectionShortEum.INBOUND.getValue(), null);
 		ManagedRouteDto dto = response.getDto();
 		assertThat(dto.getOriginEn()).isNotBlank();
 		assertThat(dto.getBound()).isEqualTo(DirectionShortEum.OUTBOUND.getValue());
@@ -292,11 +301,11 @@ public class ManagerTest {
 	}
 
 	@Test
-	@DisplayName("ManagedManager.getRouteStopListByCompanyAndRouteAndDirection Test CTB")
+	@DisplayName("ManagedManager.getRouteStopListByCompanyAndRouteAndDirectionAndServiceType Test CTB")
 	public void testGetRouteStopListByCompanyAndRouteAndDirectionCTB() throws Exception {
-		ManagedRouteStopListResponse response = managedManager.getRouteStopListByCompanyAndRouteAndDirection(
-				BusCompanyEum.CTB.getValue(), UnitTestConfiguration.testCTBRoute671(),
-				DirectionShortEum.OUTBOUND.getValue());
+		ManagedRouteStopListResponse response = managedManager
+				.getRouteStopListByCompanyAndRouteAndDirectionAndServiceType(BusCompanyEum.CTB.getValue(),
+						UnitTestConfiguration.testCTBRoute671(), DirectionShortEum.OUTBOUND.getValue(), null);
 		List<ManagedRouteStopDto> dtos = response.getDtos();
 		assertThat(dtos.size()).isGreaterThan(0);
 		assertThat(dtos.get(1).getRoute()).isEqualTo(UnitTestConfiguration.testCTBRoute671());
@@ -304,11 +313,11 @@ public class ManagerTest {
 	}
 
 	@Test
-	@DisplayName("ManagedManager.getRouteDetailByCompanyAndRouteAndDirection Test CTB")
+	@DisplayName("ManagedManager.getRouteDetailByCompanyAndRouteAndDirectionAndServiceType Test CTB")
 	public void testGetRouteDetailByCompanyAndRouteAndDirectionCTB() throws Exception {
-		ManagedRouteDetailResponse response = managedManager.getRouteDetailByCompanyAndRouteAndDirection(
+		ManagedRouteDetailResponse response = managedManager.getRouteDetailByCompanyAndRouteAndDirectionAndServiceType(
 				BusCompanyEum.CTB.getValue(), UnitTestConfiguration.testCTBRouteA29(),
-				DirectionShortEum.OUTBOUND.getValue());
+				DirectionShortEum.OUTBOUND.getValue(), null);
 		ManagedRouteDetailDto dto = response.getDto();
 		List<ManagedStopDetailDto> stopDetailDtos = dto.getStopDetailDtos();
 		assertThat(dto.getBound()).isEqualToIgnoringCase(DirectionShortEum.OUTBOUND.getValue());
@@ -320,41 +329,44 @@ public class ManagerTest {
 	@Test
 	@DisplayName("ManagedManager.getRouteStopEtaByCompanyAndStopIdAndRouteAndDirection Test CTB")
 	public void testGetRouteStopEtaByCompanyAndStopIdAndRouteAndDirectionCTB() throws Exception {
-		ManagedRouteStopEtaResponse response = managedManager.getRouteStopEtaByCompanyAndStopIdAndRouteAndDirection(BusCompanyEum.CTB.getValue(),UnitTestConfiguration.testCTBA29InboundStop(), UnitTestConfiguration.testCTBRouteA29(),DirectionFullEum.INBOUND.getValue());
+		ManagedRouteStopEtaResponse response = managedManager
+				.getRouteStopEtaByCompanyAndStopIdAndRouteAndDirectionAndServiceType(BusCompanyEum.CTB.getValue(),
+						UnitTestConfiguration.testCTBA29InboundStop(), UnitTestConfiguration.testCTBRouteA29(),
+						DirectionFullEum.INBOUND.getValue(), null);
 		List<ManagedRouteStopEtaDto> dtos = response.getDtos();
-		//assertThat(dtos.size()).isGreaterThan(0);
-		//assertThat(dtos.get(0)).isNotNull();
-		//assertThat(dtos.get(0).getDestinationEn()).isNotBlank();	
+		// assertThat(dtos.size()).isGreaterThan(0);
+		// assertThat(dtos.get(0)).isNotNull();
+		// assertThat(dtos.get(0).getDestinationEn()).isNotBlank();
 	}
 
 	// NWFB
 	@Test
-	@DisplayName("ManagedManager.getRouteListByCompanyAndRoute Test NWFB")
+	@DisplayName("ManagedManager.getRouteListByCompanyAndRouteAndServiceType Test NWFB")
 	public void testGetRouteListByCompanyAndRouteNWFB() throws Exception {
-		ManagedRouteListResponse response = managedManager.getRouteListByCompanyAndRoute(BusCompanyEum.NWFB.getValue(),
-				UnitTestConfiguration.testNWFBRoute15C());
+		ManagedRouteListResponse response = managedManager.getRouteListByCompanyAndRouteAndServiceType(
+				BusCompanyEum.NWFB.getValue(), UnitTestConfiguration.testNWFBRoute15C(), null);
 		List<ManagedRouteDto> dtos = response.getDtos();
 		assertThat(dtos.size()).isGreaterThan(0);
 		assertThat(dtos.get(1).getRoute()).isEqualTo(UnitTestConfiguration.testNWFBRoute15C());
 	}
 
 	@Test
-	@DisplayName("ManagedManager.getRouteByCompanyAndRouteAndDirection Test NWFB")
+	@DisplayName("ManagedManager.getRouteByCompanyAndRouteAndDirectionAndServiceType Test NWFB")
 	public void testGetRouteByCompanyAndRouteAndDirectionNWFB() throws Exception {
-		ManagedRouteResponse response = managedManager.getRouteByCompanyAndRouteAndDirection(
+		ManagedRouteResponse response = managedManager.getRouteByCompanyAndRouteAndDirectionAndServiceType(
 				BusCompanyEum.NWFB.getValue(), UnitTestConfiguration.testNWFBRoute18(),
-				DirectionShortEum.OUTBOUND.getValue());
+				DirectionShortEum.OUTBOUND.getValue(), null);
 		ManagedRouteDto dto = response.getDto();
 		assertThat(dto.getOriginEn()).isNotBlank();
 		assertThat(dto.getRoute()).isEqualTo(UnitTestConfiguration.testNWFBRoute18());
 	}
 
 	@Test
-	@DisplayName("ManagedManager.getRouteStopListByCompanyAndRouteAndDirection Test NWFB")
+	@DisplayName("ManagedManager.getRouteStopListByCompanyAndRouteAndDirectionAndServiceType Test NWFB")
 	public void testGetRouteStopListByCompanyAndRouteAndDirectionNWFB() throws Exception {
-		ManagedRouteStopListResponse response = managedManager.getRouteStopListByCompanyAndRouteAndDirection(
-				BusCompanyEum.NWFB.getValue(), UnitTestConfiguration.testNWFBRoute15C(),
-				DirectionShortEum.OUTBOUND.getValue());
+		ManagedRouteStopListResponse response = managedManager
+				.getRouteStopListByCompanyAndRouteAndDirectionAndServiceType(BusCompanyEum.NWFB.getValue(),
+						UnitTestConfiguration.testNWFBRoute15C(), DirectionShortEum.OUTBOUND.getValue(), null);
 		List<ManagedRouteStopDto> dtos = response.getDtos();
 		assertThat(dtos.size()).isGreaterThan(0);
 		assertThat(dtos.get(1).getRoute()).isEqualTo(UnitTestConfiguration.testNWFBRoute15C());
@@ -362,11 +374,11 @@ public class ManagerTest {
 	}
 
 	@Test
-	@DisplayName("ManagedManager.getRouteDetailByCompanyAndRouteAndDirection Test NWFB")
+	@DisplayName("ManagedManager.getRouteDetailByCompanyAndRouteAndDirectionAndServiceType Test NWFB")
 	public void testGetRouteDetailByCompanyAndRouteAndDirectionNWFB() throws Exception {
-		ManagedRouteDetailResponse response = managedManager.getRouteDetailByCompanyAndRouteAndDirection(
+		ManagedRouteDetailResponse response = managedManager.getRouteDetailByCompanyAndRouteAndDirectionAndServiceType(
 				BusCompanyEum.NWFB.getValue(), UnitTestConfiguration.testNWFBRoute18(),
-				DirectionShortEum.OUTBOUND.getValue());
+				DirectionShortEum.OUTBOUND.getValue(), null);
 		ManagedRouteDetailDto dto = response.getDto();
 		List<ManagedStopDetailDto> stopDetailDtos = dto.getStopDetailDtos();
 		assertThat(dto.getBound()).isEqualToIgnoringCase(DirectionShortEum.OUTBOUND.getValue());
@@ -374,15 +386,18 @@ public class ManagerTest {
 		assertThat(stopDetailDtos.get(2).getSeq()).isNotNull();
 		assertThat(stopDetailDtos.get(3).getStopDto().getNameEn()).isNotNull();
 	}
-	
+
 	@Test
 	@DisplayName("ManagedManager.getRouteStopEtaByCompanyAndStopIdAndRouteAndDirection Test NWFB")
 	public void testGetRouteStopEtaByCompanyAndStopIdAndRouteAndDirectionNWFB() throws Exception {
-		ManagedRouteStopEtaResponse response = managedManager.getRouteStopEtaByCompanyAndStopIdAndRouteAndDirection(BusCompanyEum.NWFB.getValue(),UnitTestConfiguration.testNWFB18OutboundStop(), UnitTestConfiguration.testNWFBRoute18(),DirectionFullEum.OUTBOUND.getValue());
+		ManagedRouteStopEtaResponse response = managedManager
+				.getRouteStopEtaByCompanyAndStopIdAndRouteAndDirectionAndServiceType(BusCompanyEum.NWFB.getValue(),
+						UnitTestConfiguration.testNWFB18OutboundStop(), UnitTestConfiguration.testNWFBRoute18(),
+						DirectionFullEum.OUTBOUND.getValue(), null);
 		List<ManagedRouteStopEtaDto> dtos = response.getDtos();
-		//assertThat(dtos.size()).isGreaterThan(0);
-		//assertThat(dtos.get(0)).isNotNull();
-		//assertThat(dtos.get(0).getDestinationEn()).isNotBlank();
+		// assertThat(dtos.size()).isGreaterThan(0);
+		// assertThat(dtos.get(0)).isNotNull();
+		// assertThat(dtos.get(0).getDestinationEn()).isNotBlank();
 	}
 
 	// CTB-NWFB Stop
@@ -394,6 +409,21 @@ public class ManagerTest {
 		ManagedStopDto dto = response.getDto();
 		assertThat(dto.getStop()).isEqualTo(UnitTestConfiguration.testCTBNWFBStop());
 		assertThat(dto.getNameEn()).isNotEmpty();
+	}
+
+	// Get route by route
+	@Test
+	@DisplayName("ManagedManager.getRouteByRoute Test 101")
+	public void testGetRouteByRoute() throws Exception {
+		ManagedRouteListResponse response = managedManager.getRouteByRoute(UnitTestConfiguration.testKMBRoute101());
+		List<ManagedRouteDto> dtos = response.getDtos();
+		for (ManagedRouteDto dto : dtos) {
+			assertThat(dto.getRoute()).contains(UnitTestConfiguration.testKMBRoute101());
+			assertTrue(dto.getCompany().equalsIgnoreCase(BusCompanyEum.KMB.getValue())
+					|| dto.getCompany().equalsIgnoreCase(BusCompanyEum.CTB.getValue())
+					|| dto.getCompany().equalsIgnoreCase(BusCompanyEum.NWFB.getValue()));
+		}
+
 	}
 
 }
