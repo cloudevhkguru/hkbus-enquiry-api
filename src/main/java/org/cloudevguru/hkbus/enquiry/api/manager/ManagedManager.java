@@ -1,13 +1,11 @@
 package org.cloudevguru.hkbus.enquiry.api.manager;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.cloudevguru.hkbus.enquiry.api.constants.BusEnquiryConstant.*;
-import org.cloudevguru.hkbus.enquiry.api.constants.CacheConstant;
 import org.cloudevguru.hkbus.enquiry.api.dto.ctbnwfb.v1.CTBNWFBv1RouteDto;
 import org.cloudevguru.hkbus.enquiry.api.dto.ctbnwfb.v1.CTBNWFBv1RouteListResponse;
 import org.cloudevguru.hkbus.enquiry.api.dto.ctbnwfb.v1.CTBNWFBv1RouteStopDto;
@@ -39,8 +37,6 @@ import org.cloudevguru.hkbus.enquiry.api.service.UtilityService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -62,7 +58,6 @@ public class ManagedManager {
 	private CTBNWFBManager ctbnwfbManager;
 
 	// route
-	@Cacheable(value = CacheConstant.MANAGED_ALL_ROUTE_LIST_CACHE)
 	public ManagedRouteListResponse getAllRoute() {
 		ManagedRouteListResponse managedResponse = new ManagedRouteListResponse();
 		List<ManagedRouteDto> managedRouteDtos = new ArrayList<ManagedRouteDto>();
@@ -71,7 +66,7 @@ public class ManagedManager {
 		for (KMBv1RouteDto kmbRoute : kmbRouteDtos) {
 			ManagedRouteDto kmbManagedRouteDto = convertKmbRouteDtoToManagedRouteDto(kmbRoute, null);
 			kmbManagedRouteDto.setCompany(BusCompanyEum.KMB.getValue().toUpperCase());
-			String key = getKeyForManagedRouteDtoChm(kmbManagedRouteDto);
+			String key = getRouteKeyForManagedRouteDtoChm(kmbManagedRouteDto);
 			List<ManagedRouteDto> managedRouteList = new ArrayList<ManagedRouteDto>();
 			managedRouteList.add(kmbManagedRouteDto);
 			concurrentHashMapService.putRouteListToRouteListChm(key, managedRouteList);
@@ -84,7 +79,7 @@ public class ManagedManager {
 			List<CTBNWFBv1RouteDto> ctbnwfbRouteDtos = ctbnwfbv1RouteListResponse.getDtos();
 			for (CTBNWFBv1RouteDto ctbnwfbRoute : ctbnwfbRouteDtos) {
 				ManagedRouteDto ctbManagedRouteDto = convertCtbnwfbRouteDtoToManagedRouteDto(ctbnwfbRoute, null);
-				String key = getKeyForManagedRouteDtoChm(ctbManagedRouteDto);
+				String key = getRouteKeyForManagedRouteDtoChm(ctbManagedRouteDto);
 				List<ManagedRouteDto> managedRouteList = new ArrayList<ManagedRouteDto>();
 				managedRouteList.add(ctbManagedRouteDto);
 				concurrentHashMapService.putRouteListToRouteListChm(key, managedRouteList);
@@ -95,7 +90,6 @@ public class ManagedManager {
 		return managedResponse;
 	}
 
-	@Cacheable(value = CacheConstant.MANAGED_ROUTE_LIST_CACHE, key = "{#company,#route,#serviceType}")
 	public ManagedRouteListResponse getRouteListByCompanyAndRouteAndServiceType(String company, String route,
 			String serviceType) {
 		utilityService.checkIsValidBusCompany(company);
@@ -126,7 +120,6 @@ public class ManagedManager {
 		return managedResponse;
 	}
 
-	@Cacheable(value = CacheConstant.MANAGED_ROUTE_CACHE, key = "{#company,#route,#direction,#serviceType}")
 	public ManagedRouteResponse getRouteByCompanyAndRouteAndDirectionAndServiceType(String company, String route,
 			String direction, String serviceType) {
 		utilityService.checkIsValidBusCompany(company);
@@ -165,23 +158,26 @@ public class ManagedManager {
 		return managedResponse;
 	}
 
-	// @Cacheable(value=CacheConstant.MANAGED_ROUTE_LIST_BY_ROUTE_CACHE)
 	public ManagedRouteListResponse getRouteByRoute(String route) {
 		ManagedRouteListResponse managedResponse = new ManagedRouteListResponse();
 		List<ManagedRouteDto> initialRouteList = new ArrayList<ManagedRouteDto>();
-		String finalRouteListKey = "FINALROUTELIST-" + route;
-		if (concurrentHashMapService.getRouteListFromRouteListChmByRouteKey(finalRouteListKey) != null
-				&& concurrentHashMapService.getRouteListFromRouteListChmByRouteKey(finalRouteListKey).size() != 0) {
-			initialRouteList = concurrentHashMapService.getRouteListFromRouteListChmByRouteKey(finalRouteListKey);
-			System.out.println(String.format("Find final-route-list in ConcurrentHashMap for %s", route));
+		String routListByRouteKey = "ROUTELISTBYROUTE" + route;
+		if (concurrentHashMapService.getRouteListFromRouteListChmByRouteKey(routListByRouteKey) != null
+				&& concurrentHashMapService.getRouteListFromRouteListChmByRouteKey(routListByRouteKey).size() != 0) {
+			// Find in ConcurrentHashMap, return result directly
+			initialRouteList = concurrentHashMapService.getRouteListFromRouteListChmByRouteKey(routListByRouteKey);
+			System.out.println(String.format("Find ROUTE-LIST-BY-ROUTE in ConcurrentHashMap for %s", route));
 			managedResponse.setDtos(initialRouteList);
 			return managedResponse;
 		}
-		if (concurrentHashMapService.getRouteListFromRouteListChmByRoute(route).size() != 0) {
-			System.out.println(String.format("Find %s in ConcurrentHashMap but not a final-route-list", route));
-			initialRouteList = concurrentHashMapService.getRouteListFromRouteListChmByRoute(route);
+		if (concurrentHashMapService.getRouteListFromRouteListChmByRouteStartWith(route).size() != 0) {
+			// Cannot find in ConcurrentHashMap, check route stored in hashmap and return
+			System.out.println(String.format("Find %s in ConcurrentHashMap but not a ROUTE-LIST-BY-ROUTE", route));
+			initialRouteList = concurrentHashMapService.getRouteListFromRouteListChmByRouteStartWith(route);
 		} else if (concurrentHashMapService.isEmptyRouteListChm()) {
-			System.out.println("Cannot find " + route + " in ConcurrentHashMap and ConcurrentHashMap is Empty.");
+			// ConcurrentHasMap did not have record, reload it and find
+			System.out.println(
+					"Cannot find raw route " + route + " in ConcurrentHashMap and ConcurrentHashMap is Empty.");
 			List<ManagedRouteDto> allRouteList = getAllRoute().getDtos();
 			initialRouteList = allRouteList.stream()
 					.filter(routeDto -> routeDto.getRoute().toUpperCase().startsWith(route.toUpperCase()))
@@ -204,16 +200,15 @@ public class ManagedManager {
 				finalRouteList.add(routeDto);
 			}
 		}
-		
-		if(finalRouteList.size()>0) {
-			concurrentHashMapService.putRouteListToRouteListChm(finalRouteListKey, finalRouteList);
+
+		if (finalRouteList.size() > 0) {
+			concurrentHashMapService.putRouteListToRouteListChm(routListByRouteKey, finalRouteList);
 		}
 		managedResponse.setDtos(finalRouteList);
 		return managedResponse;
 	}
 
 	// Stop
-	@Cacheable(value = CacheConstant.MANAGED_STOP_CACHE, key = "{#company,#stopId}")
 	public ManagedStopResponse getStopByCompanyAndStopId(String company, String stopId) {
 		utilityService.checkIsValidBusCompany(company);
 		ManagedStopResponse managedResponse = new ManagedStopResponse();
@@ -260,28 +255,35 @@ public class ManagedManager {
 	}
 
 	// Route Detail
-	@Cacheable(value = CacheConstant.MANAGED_ROUTE_DETAIL_CACHE, key = "{#company,#route,#direction,#serviceType}")
 	public ManagedRouteDetailResponse getRouteDetailByCompanyAndRouteAndDirectionAndServiceType(String company,
 			String route, String direction, String serviceType) {
 		ManagedRouteDetailResponse response = new ManagedRouteDetailResponse();
-		ManagedRouteDto managedRouteDto = getRouteByCompanyAndRouteAndDirectionAndServiceType(company, route, direction,
-				serviceType).getDto();
-		if (managedRouteDto != null) {
-			String directionFull = utilityService.convertDirectionToFull(managedRouteDto.getBound());
-			ManagedRouteDetailDto manageRouteDetailDto = modelMapper.map(managedRouteDto, ManagedRouteDetailDto.class);
-			List<ManagedRouteStopDto> managedRouteStopDtos = getRouteStopListByCompanyAndRouteAndDirectionAndServiceType(
-					company, route, directionFull, serviceType).getDtos();
-			List<ManagedStopDetailDto> managedStopDetailDtos = new ArrayList<ManagedStopDetailDto>();
-			for (ManagedRouteStopDto managedRouteStopDto : managedRouteStopDtos) {
-				ManagedStopDto managedStopDto = getStopByCompanyAndStopId(company, managedRouteStopDto.getStop())
-						.getDto();
-				ManagedStopDetailDto managedStopDetailDto = new ManagedStopDetailDto();
-				managedStopDetailDto.setStopDto(managedStopDto);
-				managedStopDetailDto.setSeq(Integer.valueOf(managedRouteStopDto.getSeq()));
-				managedStopDetailDtos.add(managedStopDetailDto);
+		String routeDetailKey=getRouteDetailKeyForManagedRouteDetailChm(company, route, direction, serviceType);
+		if (concurrentHashMapService.getRouteDetailResponseFromRouteDetailChm(routeDetailKey) != null) {
+			System.out.println(String.format("Find ROUTE-DETAIL in ConcurrentHashMap for %s", routeDetailKey));
+			response=concurrentHashMapService.getRouteDetailResponseFromRouteDetailChm(routeDetailKey);
+		}else {
+			System.out.println(String.format("Cannot find ROUTE-DETAIL in ConcurrentHashMap for %s", routeDetailKey));
+			ManagedRouteDto managedRouteDto = getRouteByCompanyAndRouteAndDirectionAndServiceType(company, route, direction,
+					serviceType).getDto();
+			if (managedRouteDto != null) {
+				String directionFull = utilityService.convertDirectionToFull(managedRouteDto.getBound());
+				ManagedRouteDetailDto manageRouteDetailDto = modelMapper.map(managedRouteDto, ManagedRouteDetailDto.class);
+				List<ManagedRouteStopDto> managedRouteStopDtos = getRouteStopListByCompanyAndRouteAndDirectionAndServiceType(
+						company, route, directionFull, serviceType).getDtos();
+				List<ManagedStopDetailDto> managedStopDetailDtos = new ArrayList<ManagedStopDetailDto>();
+				for (ManagedRouteStopDto managedRouteStopDto : managedRouteStopDtos) {
+					ManagedStopDto managedStopDto = getStopByCompanyAndStopId(company, managedRouteStopDto.getStop())
+							.getDto();
+					ManagedStopDetailDto managedStopDetailDto = new ManagedStopDetailDto();
+					managedStopDetailDto.setStopDto(managedStopDto);
+					managedStopDetailDto.setSeq(Integer.valueOf(managedRouteStopDto.getSeq()));
+					managedStopDetailDtos.add(managedStopDetailDto);
+				}
+				manageRouteDetailDto.setStopDetailDtos(managedStopDetailDtos);
+				response.setDto(manageRouteDetailDto);
+				concurrentHashMapService.putRouteDetailResponseToRouteDetailChm(routeDetailKey, response);
 			}
-			manageRouteDetailDto.setStopDetailDtos(managedStopDetailDtos);
-			response.setDto(manageRouteDetailDto);
 		}
 		return response;
 	}
@@ -344,7 +346,7 @@ public class ManagedManager {
 		return managedRouteDto;
 	}
 
-	private String getKeyForManagedRouteDtoChm(ManagedRouteDto dto) {
+	private String getRouteKeyForManagedRouteDtoChm(ManagedRouteDto dto) {
 		String modifiedDirection;
 		String modifiedServiceType;
 		if (dto.getBound() == null || dto.getBound().isEmpty()) {
@@ -359,5 +361,22 @@ public class ManagedManager {
 		}
 		return String.format("%s-%s-%s-%s", dto.getCompany().toUpperCase(), dto.getRoute().toUpperCase(),
 				modifiedDirection, modifiedServiceType);
+	}
+
+	private String getRouteDetailKeyForManagedRouteDetailChm(String company, String route, String direction, String serviceType) {
+		String modifiedDirection;
+		String modifiedServiceType;
+		if (direction == null || direction.isEmpty()) {
+			modifiedDirection = "na";
+		} else {
+			modifiedDirection = utilityService.convertDirectionToFull(direction);
+		}
+		if (serviceType == null || serviceType.isEmpty()) {
+			modifiedServiceType = "na";
+		} else {
+			modifiedServiceType = serviceType;
+		}
+		return String.format("%s-%s-%s-%s", company.toUpperCase(), route.toUpperCase(), modifiedDirection,
+				modifiedServiceType);
 	}
 }
