@@ -41,13 +41,20 @@ public class ManagedController {
 		return managedManager.getRouteListByCompanyAndRouteAndServiceType(company, route, serviceType);
 	}
 
-	@GetMapping(path = {"/route/{company}/{route}/{direction}/", "/route/{company}/{route}/{direction}/{serviceType}"})
+	@GetMapping(path = "/route/{company}/{route}/{direction}/{serviceType}")
 	public ManagedRouteResponse getRouteByCompanyAndRouteAndDirectionAndServiceType(
 			@PathVariable("company") String company, @PathVariable("route") String route,
 			@PathVariable("direction") String direction,
-			@PathVariable(name = "serviceType") String serviceType) {
+			@PathVariable("serviceType") String serviceType) {
 		return managedManager.getRouteByCompanyAndRouteAndDirectionAndServiceType(company, route, direction,
 				serviceType);
+	}
+	
+	@GetMapping(path = "/route/{company}/{route}/{direction}")
+	public ManagedRouteResponse getRouteByCompanyAndRouteAndDirectionAndServiceType(
+			@PathVariable("company") String company, @PathVariable("route") String route,
+			@PathVariable("direction") String direction) {
+		return managedManager.getRouteByCompanyAndRouteAndDirectionAndServiceType(company, route, direction,null);
 	}
 
 	@GetMapping(path = "/stop/{company}/{stopId}")
