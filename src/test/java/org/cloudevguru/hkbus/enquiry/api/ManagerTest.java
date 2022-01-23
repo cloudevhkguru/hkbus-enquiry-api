@@ -424,5 +424,14 @@ public class ManagerTest extends BaseTestEntity {
 		}
 
 	}
+	
+	@Test
+	@DisplayName("ManagedManager.getRouteByRoute Test No result route 30M")
+	public void testGetRouteByRouteNoResultRoute() throws Exception {
+		ManagedRouteListResponse preTestResponse = managedManager.getRouteByRoute(UnitTestConfiguration.testNoResultRoute());
+		ManagedRouteListResponse response = managedManager.getRouteByRoute(UnitTestConfiguration.testNoResultRoute());
+		List<ManagedRouteDto> dtos = response.getDtos();
+		assertThat(dtos.size()).isZero();
+	}
 
 }

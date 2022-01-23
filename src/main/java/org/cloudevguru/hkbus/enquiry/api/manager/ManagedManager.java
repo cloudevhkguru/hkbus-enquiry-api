@@ -204,7 +204,10 @@ public class ManagedManager {
 				finalRouteList.add(routeDto);
 			}
 		}
-		concurrentHashMapService.putRouteListToRouteListChm(finalRouteListKey, finalRouteList);
+		
+		if(finalRouteList.size()>0) {
+			concurrentHashMapService.putRouteListToRouteListChm(finalRouteListKey, finalRouteList);
+		}
 		managedResponse.setDtos(finalRouteList);
 		return managedResponse;
 	}
