@@ -7,18 +7,5 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class SystemServiceImpl implements SystemService {
-	@Autowired
-	private CacheManager cacheManager;
 
-	@Override
-	public void cacheEvict(String cacheName) {
-		cacheManager.getCache(cacheName).clear();
-	}
-
-	@Override
-	public void cacheAllEvict() {
-		cacheManager.getCacheNames().stream().forEach(cacheName -> {
-			cacheManager.getCache(cacheName).clear();
-		});
-	}
 }
