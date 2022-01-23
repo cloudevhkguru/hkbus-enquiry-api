@@ -70,4 +70,9 @@ public class UnitTestConfiguration {
 		return "002737";
 	}
 	
+	@Bean
+	public static String testNoResultRoute() {
+		return "30M";
+	}
+	
 }
