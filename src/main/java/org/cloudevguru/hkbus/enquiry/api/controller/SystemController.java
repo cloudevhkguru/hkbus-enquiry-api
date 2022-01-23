@@ -15,7 +15,8 @@ public class SystemController {
 
 	@GetMapping(path = "/system/healthcheck")
 	public String healthCheck() {
-		return "It works!";
+		systemManager.preloadRouteList(); // Load Balancer help to preload Route List during health-check
+		return String.format("It works and preload route-list at %s", new Date());
 	}
 
 	@GetMapping(path = "/system/cacheEvict")
