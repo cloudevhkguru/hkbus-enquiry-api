@@ -27,14 +27,8 @@ public class SystemManager {
 
 	@Scheduled(cron="${evict.cache.cron}")
 	public void cacheAllEvict() {
-		System.out.println(String.format("Evicting all caches at %s",new Date()));
-		systemService.cacheAllEvict();
 		concurrentHashMapService.cleanRouteListChm();
-	}
-
-	public void cacheEvict(String cacheName) {
-		System.out.println(String.format("Evicting %s at %s",cacheName,new Date()));
-		systemService.cacheEvict(cacheName);
+		concurrentHashMapService.cleanRouteDetailChm();
 	}
 	
 	@Async
