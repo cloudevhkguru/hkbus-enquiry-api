@@ -5,6 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.cloudevguru.hkbus.enquiry.api.dto.managed.ManagedRouteDetailResponse;
 import org.cloudevguru.hkbus.enquiry.api.dto.managed.ManagedRouteDto;
+import org.cloudevguru.hkbus.enquiry.api.dto.routefare.v1.RouteFareDto;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -13,10 +14,12 @@ public class ConncurrentHaspMapConfig {
 	
 	private ConcurrentHashMap<String, List<ManagedRouteDto>> managedRouteListConcurrentHashMap;
 	private ConcurrentHashMap<String, ManagedRouteDetailResponse> managedRouteDetailResponseConcurrentHashMap;
+	private ConcurrentHashMap<String, RouteFareDto> routeFareDtoConcurrentHashMap;
 
 	public ConncurrentHaspMapConfig() {
 		managedRouteListConcurrentHashMap=new ConcurrentHashMap<String, List<ManagedRouteDto>>();
 		managedRouteDetailResponseConcurrentHashMap=new ConcurrentHashMap<String, ManagedRouteDetailResponse>();
+		routeFareDtoConcurrentHashMap=new ConcurrentHashMap<String, RouteFareDto>();
 	}
 	
 	@Bean
@@ -27,5 +30,10 @@ public class ConncurrentHaspMapConfig {
 	@Bean
 	public ConcurrentHashMap<String, ManagedRouteDetailResponse> managedRouteDetailResponseChm() {
 		return  managedRouteDetailResponseConcurrentHashMap;
+	}
+	
+	@Bean
+	public ConcurrentHashMap<String, RouteFareDto> routeFareDtoChm() {
+		return  routeFareDtoConcurrentHashMap;
 	}
 }

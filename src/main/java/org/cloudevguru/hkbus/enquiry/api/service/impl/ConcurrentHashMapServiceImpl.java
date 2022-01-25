@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.cloudevguru.hkbus.enquiry.api.dto.managed.ManagedRouteDetailResponse;
 import org.cloudevguru.hkbus.enquiry.api.dto.managed.ManagedRouteDto;
+import org.cloudevguru.hkbus.enquiry.api.dto.routefare.v1.RouteFareDto;
 import org.cloudevguru.hkbus.enquiry.api.service.ConcurrentHashMapService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,9 @@ public class ConcurrentHashMapServiceImpl implements ConcurrentHashMapService {
 
 	@Autowired
 	private ConcurrentHashMap<String, ManagedRouteDetailResponse> managedRouteDetailResponseChm;
+
+	@Autowired
+	private ConcurrentHashMap<String, RouteFareDto> routeFareDtoChm;
 
 	@Override
 	public List<ManagedRouteDto> getRouteListFromRouteListChmByRouteStartWith(String route) {
@@ -59,8 +63,33 @@ public class ConcurrentHashMapServiceImpl implements ConcurrentHashMapService {
 	}
 
 	@Override
+	public List<RouteFareDto> getAllRouteFareDtoFromrouteFareDtoChm() {
+		List<RouteFareDto> routeFareDtos=new ArrayList<RouteFareDto>();
+		routeFareDtoChm.forEachEntry(8, (entry)->{
+			routeFareDtos.add(entry.getValue());
+		});
+		return routeFareDtos;
+	}
+	
+	@Override
+	public RouteFareDto getRouteFareDtoFromrouteFareDtoChmByRouteFareKey(String routeFareKey) {
+		return routeFareDtoChm.get(routeFareKey);
+	}
+
+	@Override
+	public RouteFareDto putRouteFareDtoTorouteFareDtoChm(String routeFareKey, RouteFareDto routeFareDto) {
+		System.out.println("Creating route-fare record with key=" + routeFareKey + " at " + new Date());
+		return routeFareDtoChm.putIfAbsent(routeFareKey, routeFareDto);
+	}
+
+	@Override
 	public Boolean isEmptyRouteListChm() {
 		return managedRouteListResponseChm.isEmpty();
+	}
+
+	@Override
+	public Boolean isEmptyRouteFareDtoChm() {
+		return routeFareDtoChm.isEmpty()||routeFareDtoChm==null;
 	}
 
 	@Override
@@ -73,9 +102,17 @@ public class ConcurrentHashMapServiceImpl implements ConcurrentHashMapService {
 
 	@Override
 	public void cleanRouteDetailChm() {
-		System.out.println("Start cleaning routeDetailChm" + new Date());
+		System.out.println("Start cleaning routeDetailChm at " + new Date());
 		managedRouteDetailResponseChm.forEachKey(4, k -> {
 			managedRouteDetailResponseChm.remove(k);
+		});
+	}
+	
+	@Override
+	public void cleanRouteFareChm() {
+		System.out.println("Start cleaning routeFareChm at " + new Date());
+		routeFareDtoChm.forEachKey(4, k -> {
+			routeFareDtoChm.remove(k);
 		});
 	}
 

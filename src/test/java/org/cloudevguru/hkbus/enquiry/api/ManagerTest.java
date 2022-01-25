@@ -3,7 +3,7 @@ package org.cloudevguru.hkbus.enquiry.api;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.Date;
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.cloudevguru.hkbus.enquiry.api.configuration.UnitTestConfiguration;
@@ -33,6 +33,7 @@ import org.cloudevguru.hkbus.enquiry.api.dto.managed.ManagedRouteStopListRespons
 import org.cloudevguru.hkbus.enquiry.api.dto.managed.ManagedStopDetailDto;
 import org.cloudevguru.hkbus.enquiry.api.dto.managed.ManagedStopDto;
 import org.cloudevguru.hkbus.enquiry.api.dto.managed.ManagedStopResponse;
+import org.cloudevguru.hkbus.enquiry.api.dto.routefare.v1.RouteFareDto;
 import org.cloudevguru.hkbus.enquiry.api.manager.CTBNWFBManager;
 import org.cloudevguru.hkbus.enquiry.api.manager.KMBManager;
 import org.cloudevguru.hkbus.enquiry.api.manager.ManagedManager;
@@ -433,6 +434,47 @@ public class ManagerTest extends BaseTestEntity {
 		ManagedRouteListResponse response = managedManager.getRouteByRoute(UnitTestConfiguration.testNoResultRoute());
 		List<ManagedRouteDto> dtos = response.getDtos();
 		assertThat(dtos.size()).isZero();
+	}
+	
+	// Route Fare
+	@Test
+	@DisplayName("ManagedManager.getRouteFareByRoute Test KMB")
+	public void testGetRouteFareByRouteKmb() throws Exception {
+		List<RouteFareDto> routeFareDtos = managedManager.getRouteFareByRoute(UnitTestConfiguration.testKMBRoute1A());
+		assertThat(routeFareDtos.size()).isNotZero();
+		assertTrue(routeFareDtos.get(0).getCompany().equalsIgnoreCase(BusCompanyEum.KMB.getValue()));
+		assertThat(routeFareDtos.get(0).getFullFare()).isGreaterThan(BigDecimal.ZERO);
+	}
+	
+	@Test
+	@DisplayName("ManagedManager.getRouteFareByRoute Test CTB")
+	public void testGetRouteFareByRouteCtb() throws Exception {
+		List<RouteFareDto> routeFareDtos = managedManager.getRouteFareByRoute(UnitTestConfiguration.testCTBRouteA29());
+		assertThat(routeFareDtos.size()).isNotZero();
+		assertTrue(routeFareDtos.get(0).getCompany().equalsIgnoreCase(BusCompanyEum.CTB.getValue()));
+		assertThat(routeFareDtos.get(0).getFullFare()).isGreaterThan(BigDecimal.ZERO);
+	}
+	
+	@Test
+	@DisplayName("ManagedManager.getRouteFareByRoute Test NWFB")
+	public void testGetRouteFareByRouteNwfb() throws Exception {
+		List<RouteFareDto> routeFareDtos = managedManager.getRouteFareByRoute(UnitTestConfiguration.testNWFBRoute15C());
+		assertThat(routeFareDtos.size()).isNotZero();
+		assertTrue(routeFareDtos.get(0).getCompany().equalsIgnoreCase(BusCompanyEum.NWFB.getValue()));
+		assertThat(routeFareDtos.get(0).getFullFare()).isGreaterThan(BigDecimal.ZERO);
+	}
+	
+	@Test
+	@DisplayName("ManagedManager.getRouteFareByRoute Test KMB+CTB")
+	public void testGetRouteFareByRouteKmbCtb() throws Exception {
+		List<RouteFareDto> routeFareDtos = managedManager.getRouteFareByRoute(UnitTestConfiguration.testKMBRoute101());
+		assertThat(routeFareDtos.size()).isNotZero();
+		for(RouteFareDto routeFareDto: routeFareDtos) {
+			assertTrue(routeFareDto.getCompany().equalsIgnoreCase(BusCompanyEum.KMB.getValue())
+					|| routeFareDto.getCompany().equalsIgnoreCase(BusCompanyEum.CTB.getValue())
+					|| routeFareDto.getCompany().equalsIgnoreCase(BusCompanyEum.NWFB.getValue()));
+			assertThat(routeFareDto.getFullFare()).isGreaterThan(BigDecimal.ZERO);
+		}
 	}
 
 }
