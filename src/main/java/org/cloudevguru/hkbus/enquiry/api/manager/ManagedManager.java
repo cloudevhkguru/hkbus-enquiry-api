@@ -1,5 +1,6 @@
 package org.cloudevguru.hkbus.enquiry.api.manager;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -32,18 +33,25 @@ import org.cloudevguru.hkbus.enquiry.api.dto.managed.ManagedRouteStopListRespons
 import org.cloudevguru.hkbus.enquiry.api.dto.managed.ManagedStopDetailDto;
 import org.cloudevguru.hkbus.enquiry.api.dto.managed.ManagedStopDto;
 import org.cloudevguru.hkbus.enquiry.api.dto.managed.ManagedStopResponse;
+import org.cloudevguru.hkbus.enquiry.api.dto.routefare.v1.RouteFareDto;
 import org.cloudevguru.hkbus.enquiry.api.service.ConcurrentHashMapService;
+import org.cloudevguru.hkbus.enquiry.api.service.RouteFareService;
 import org.cloudevguru.hkbus.enquiry.api.service.UtilityService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
+import net.bytebuddy.asm.Advice.Return;
+
 @Component
 public class ManagedManager {
 
 	@Autowired
 	private UtilityService utilityService;
+
+	@Autowired
+	private RouteFareService routeFareService;
 
 	@Autowired
 	private ConcurrentHashMapService concurrentHashMapService;
@@ -58,13 +66,13 @@ public class ManagedManager {
 	private CTBNWFBManager ctbnwfbManager;
 
 	// route
-	public ManagedRouteListResponse getAllRoute() {
+	private ManagedRouteListResponse getAllRoute() {
 		ManagedRouteListResponse managedResponse = new ManagedRouteListResponse();
 		List<ManagedRouteDto> managedRouteDtos = new ArrayList<ManagedRouteDto>();
 		KMBv1RouteListResponse kmbv1RouteListResponse = kmbManager.getKMBv1RouteList();
 		List<KMBv1RouteDto> kmbRouteDtos = kmbv1RouteListResponse.getDtos();
 		for (KMBv1RouteDto kmbRoute : kmbRouteDtos) {
-			ManagedRouteDto kmbManagedRouteDto = convertKmbRouteDtoToManagedRouteDto(kmbRoute, null);
+			ManagedRouteDto kmbManagedRouteDto = convertKmbRouteDtoToManagedRouteDto(kmbRoute, null, null);
 			kmbManagedRouteDto.setCompany(BusCompanyEum.KMB.getValue().toUpperCase());
 			String key = getRouteKeyForManagedRouteDtoChm(kmbManagedRouteDto);
 			List<ManagedRouteDto> managedRouteList = new ArrayList<ManagedRouteDto>();
@@ -78,7 +86,7 @@ public class ManagedManager {
 					.getCTBNWFBv1AllRoutesByCompany(company);
 			List<CTBNWFBv1RouteDto> ctbnwfbRouteDtos = ctbnwfbv1RouteListResponse.getDtos();
 			for (CTBNWFBv1RouteDto ctbnwfbRoute : ctbnwfbRouteDtos) {
-				ManagedRouteDto ctbManagedRouteDto = convertCtbnwfbRouteDtoToManagedRouteDto(ctbnwfbRoute, null);
+				ManagedRouteDto ctbManagedRouteDto = convertCtbnwfbRouteDtoToManagedRouteDto(ctbnwfbRoute, null, null);
 				String key = getRouteKeyForManagedRouteDtoChm(ctbManagedRouteDto);
 				List<ManagedRouteDto> managedRouteList = new ArrayList<ManagedRouteDto>();
 				managedRouteList.add(ctbManagedRouteDto);
@@ -102,7 +110,11 @@ public class ManagedManager {
 				isCircularRoute = true;
 			}
 			for (KMBv1RouteDto kmbRouteDto : kmbResponse.getDtos()) {
-				managedRouteDtos.add(convertKmbRouteDtoToManagedRouteDto(kmbRouteDto, isCircularRoute));
+				String routeFareKey = getRouteFareKey(company, route, kmbRouteDto.getOriginEn(),
+						kmbRouteDto.getDestinationEn());
+				RouteFareDto routeFareDto = getRouteFareByRouteFareKey(routeFareKey);
+				managedRouteDtos.add(
+						convertKmbRouteDtoToManagedRouteDto(kmbRouteDto, isCircularRoute, routeFareDto.getFullFare()));
 			}
 		} else {
 			CTBNWFBv1RouteListResponse ctbnwfbResponse = ctbnwfbManager.getCTBNWFBv1RouteListByCompanyAndRoute(company,
@@ -112,7 +124,11 @@ public class ManagedManager {
 					isCircularRoute = true;
 				}
 				for (CTBNWFBv1RouteDto ctbnwfbRouteDto : ctbnwfbResponse.getDtos()) {
-					managedRouteDtos.add(convertCtbnwfbRouteDtoToManagedRouteDto(ctbnwfbRouteDto, isCircularRoute));
+					String routeFareKey = getRouteFareKey(company, route, ctbnwfbRouteDto.getOriginEn(),
+							ctbnwfbRouteDto.getDestinationEn());
+					RouteFareDto routeFareDto = getRouteFareByRouteFareKey(routeFareKey);
+					managedRouteDtos.add(convertCtbnwfbRouteDtoToManagedRouteDto(ctbnwfbRouteDto, isCircularRoute,
+							routeFareDto.getFullFare()));
 				}
 			}
 		}
@@ -161,7 +177,7 @@ public class ManagedManager {
 	public ManagedRouteListResponse getRouteByRoute(String route) {
 		ManagedRouteListResponse managedResponse = new ManagedRouteListResponse();
 		List<ManagedRouteDto> initialRouteList = new ArrayList<ManagedRouteDto>();
-		String routListByRouteKey = "ROUTELISTBYROUTE" + route;
+		String routListByRouteKey = "ROUTELISTBYROUTE" + route.toUpperCase();
 		if (concurrentHashMapService.getRouteListFromRouteListChmByRouteKey(routListByRouteKey) != null
 				&& concurrentHashMapService.getRouteListFromRouteListChmByRouteKey(routListByRouteKey).size() != 0) {
 			// Find in ConcurrentHashMap, return result directly
@@ -194,9 +210,15 @@ public class ManagedManager {
 				List<ManagedRouteDto> additionalManagedRouteDtos = getRouteListByCompanyAndRouteAndServiceType(company2,
 						route2, null).getDtos();
 				for (ManagedRouteDto additioManagedRouteDto : additionalManagedRouteDtos) {
+					String routeFareKey=getRouteFareKey(additioManagedRouteDto.getCompany(), additioManagedRouteDto.getRoute(), additioManagedRouteDto.getOriginEn(), additioManagedRouteDto.getDestinationEn());
+					RouteFareDto routeFareDto=getRouteFareByRouteFareKey(routeFareKey);
+					additioManagedRouteDto.setFullFare(routeFareDto.getFullFare());
 					finalRouteList.add(additioManagedRouteDto);
 				}
 			} else {
+				String routeFareKey=getRouteFareKey(routeDto.getCompany(), routeDto.getRoute(), routeDto.getOriginEn(), routeDto.getDestinationEn());
+				RouteFareDto routeFareDto=getRouteFareByRouteFareKey(routeFareKey);
+				routeDto.setFullFare(routeFareDto.getFullFare());
 				finalRouteList.add(routeDto);
 			}
 		}
@@ -258,17 +280,18 @@ public class ManagedManager {
 	public ManagedRouteDetailResponse getRouteDetailByCompanyAndRouteAndDirectionAndServiceType(String company,
 			String route, String direction, String serviceType) {
 		ManagedRouteDetailResponse response = new ManagedRouteDetailResponse();
-		String routeDetailKey=getRouteDetailKeyForManagedRouteDetailChm(company, route, direction, serviceType);
+		String routeDetailKey = getRouteDetailKeyForManagedRouteDetailChm(company, route, direction, serviceType);
 		if (concurrentHashMapService.getRouteDetailResponseFromRouteDetailChm(routeDetailKey) != null) {
 			System.out.println(String.format("Find ROUTE-DETAIL in ConcurrentHashMap for %s", routeDetailKey));
-			response=concurrentHashMapService.getRouteDetailResponseFromRouteDetailChm(routeDetailKey);
-		}else {
+			response = concurrentHashMapService.getRouteDetailResponseFromRouteDetailChm(routeDetailKey);
+		} else {
 			System.out.println(String.format("Cannot find ROUTE-DETAIL in ConcurrentHashMap for %s", routeDetailKey));
-			ManagedRouteDto managedRouteDto = getRouteByCompanyAndRouteAndDirectionAndServiceType(company, route, direction,
-					serviceType).getDto();
+			ManagedRouteDto managedRouteDto = getRouteByCompanyAndRouteAndDirectionAndServiceType(company, route,
+					direction, serviceType).getDto();
 			if (managedRouteDto != null) {
 				String directionFull = utilityService.convertDirectionToFull(managedRouteDto.getBound());
-				ManagedRouteDetailDto manageRouteDetailDto = modelMapper.map(managedRouteDto, ManagedRouteDetailDto.class);
+				ManagedRouteDetailDto manageRouteDetailDto = modelMapper.map(managedRouteDto,
+						ManagedRouteDetailDto.class);
 				List<ManagedRouteStopDto> managedRouteStopDtos = getRouteStopListByCompanyAndRouteAndDirectionAndServiceType(
 						company, route, directionFull, serviceType).getDtos();
 				List<ManagedStopDetailDto> managedStopDetailDtos = new ArrayList<ManagedStopDetailDto>();
@@ -331,18 +354,71 @@ public class ManagedManager {
 		return response;
 	}
 
-	private ManagedRouteDto convertKmbRouteDtoToManagedRouteDto(KMBv1RouteDto kmbv1RouteDto, Boolean isCircularRoute) {
+	// RouteFare
+	private List<RouteFareDto> getAllRouteFare() {
+		List<RouteFareDto> routeFareDtos = new ArrayList<RouteFareDto>();
+		List<RouteFareDto> dtos = routeFareService.getAllBusesRouteFare();
+		for (RouteFareDto dto : dtos) {
+			String[] companys = dto.getCompany().split("\\+");
+			for (String company : companys) {
+				RouteFareDto clonedDto;
+				try {
+					clonedDto = (RouteFareDto) dto.clone();
+					clonedDto.setCompany(company);
+					String routeFareKey = getRouteFareKey(clonedDto);
+					concurrentHashMapService.putRouteFareDtoTorouteFareDtoChm(routeFareKey, clonedDto);
+					routeFareDtos.add(clonedDto);
+				} catch (CloneNotSupportedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		return routeFareDtos;
+	}
+
+	private RouteFareDto getRouteFareByRouteFareKey(String routeFareKey) {
+		if(concurrentHashMapService.isEmptyRouteFareDtoChm()) {
+			getAllRouteFare();
+		}
+		String[] routeDetail = routeFareKey.split("-");
+		String reverseRouteFareKey = getRouteFareKey(routeDetail[0], routeDetail[1], routeDetail[3], routeDetail[2]);
+		if (concurrentHashMapService.getRouteFareDtoFromrouteFareDtoChmByRouteFareKey(routeFareKey) != null) {
+			return concurrentHashMapService.getRouteFareDtoFromrouteFareDtoChmByRouteFareKey(routeFareKey);
+		} else if (concurrentHashMapService
+				.getRouteFareDtoFromrouteFareDtoChmByRouteFareKey(reverseRouteFareKey) != null) {
+			return concurrentHashMapService.getRouteFareDtoFromrouteFareDtoChmByRouteFareKey(reverseRouteFareKey);
+		} else {
+			return new RouteFareDto();
+		}
+	}
+
+	public List<RouteFareDto> getRouteFareByRoute(String route) {
+		List<RouteFareDto> dtos = getAllRouteFare();
+		List<RouteFareDto> routeFareDtos = new ArrayList<RouteFareDto>();
+		for (RouteFareDto dto : dtos) {
+			if (dto.getRouteNameEn().equalsIgnoreCase(route)) {
+				routeFareDtos.add(dto);
+			}
+		}
+		return routeFareDtos;
+	}
+
+	private ManagedRouteDto convertKmbRouteDtoToManagedRouteDto(KMBv1RouteDto kmbv1RouteDto, Boolean isCircularRoute,
+			BigDecimal fullFare) {
 		String company = BusCompanyEum.KMB.getValue().toUpperCase();
 		ManagedRouteDto managedRouteDto = modelMapper.map(kmbv1RouteDto, ManagedRouteDto.class);
 		managedRouteDto.setCompany(company);
 		managedRouteDto.setIsCircularRoute(isCircularRoute);
+		managedRouteDto.setFullFare(fullFare);
 		return managedRouteDto;
 	}
 
 	private ManagedRouteDto convertCtbnwfbRouteDtoToManagedRouteDto(CTBNWFBv1RouteDto ctbnwfbv1RouteDto,
-			Boolean isCircularRoute) {
+			Boolean isCircularRoute, BigDecimal fullFare) {
 		ManagedRouteDto managedRouteDto = modelMapper.map(ctbnwfbv1RouteDto, ManagedRouteDto.class);
 		managedRouteDto.setIsCircularRoute(isCircularRoute);
+		managedRouteDto.setFullFare(fullFare);
 		return managedRouteDto;
 	}
 
@@ -363,7 +439,8 @@ public class ManagedManager {
 				modifiedDirection, modifiedServiceType);
 	}
 
-	private String getRouteDetailKeyForManagedRouteDetailChm(String company, String route, String direction, String serviceType) {
+	private String getRouteDetailKeyForManagedRouteDetailChm(String company, String route, String direction,
+			String serviceType) {
 		String modifiedDirection;
 		String modifiedServiceType;
 		if (direction == null || direction.isEmpty()) {
@@ -378,5 +455,21 @@ public class ManagedManager {
 		}
 		return String.format("%s-%s-%s-%s", company.toUpperCase(), route.toUpperCase(), modifiedDirection,
 				modifiedServiceType);
+	}
+
+	private String getRouteFareKey(RouteFareDto routeFareDto) {
+		String modifiedCompany;
+		if (routeFareDto.getCompany().equalsIgnoreCase(BusCompanyEum.LWB.getValue())) {
+			modifiedCompany = BusCompanyEum.KMB.getValue().toUpperCase();
+		} else {
+			modifiedCompany = routeFareDto.getCompany().toUpperCase();
+		}
+		return getRouteFareKey(modifiedCompany, routeFareDto.getRouteNameEn(), routeFareDto.getOriginEn(),
+				routeFareDto.getDestinationEn());
+	}
+
+	private String getRouteFareKey(String company, String route, String originEn, String destinationEn) {
+		return String.format("%s-%s-%s-%s", company, route, utilityService.removeSpace(originEn),
+				utilityService.removeSpace(destinationEn)).toUpperCase();
 	}
 }

@@ -1,5 +1,7 @@
 package org.cloudevguru.hkbus.enquiry.api.dto.managed;
 
+import java.math.BigDecimal;
+
 public class ManagedRouteDto {
 
 	private String company;
@@ -23,6 +25,8 @@ public class ManagedRouteDto {
 	private String destinationSc;
 	
 	private Boolean isCircularRoute;
+	
+	private BigDecimal fullFare;
 
 	public String getCompany() {
 		return company;
@@ -110,6 +114,14 @@ public class ManagedRouteDto {
 
 	public void setIsCircularRoute(Boolean isCircularRoute) {
 		this.isCircularRoute = isCircularRoute;
+	}
+
+	public BigDecimal getFullFare() {
+		return fullFare;
+	}
+
+	public void setFullFare(BigDecimal fullFare) {
+		this.fullFare = fullFare;
 	}
 	
 }

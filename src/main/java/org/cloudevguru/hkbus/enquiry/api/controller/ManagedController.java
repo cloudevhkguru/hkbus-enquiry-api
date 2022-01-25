@@ -1,11 +1,14 @@
 package org.cloudevguru.hkbus.enquiry.api.controller;
 
+import java.util.List;
+
 import org.cloudevguru.hkbus.enquiry.api.dto.managed.ManagedRouteDetailResponse;
 import org.cloudevguru.hkbus.enquiry.api.dto.managed.ManagedRouteListResponse;
 import org.cloudevguru.hkbus.enquiry.api.dto.managed.ManagedRouteResponse;
 import org.cloudevguru.hkbus.enquiry.api.dto.managed.ManagedRouteStopEtaResponse;
 import org.cloudevguru.hkbus.enquiry.api.dto.managed.ManagedRouteStopListResponse;
 import org.cloudevguru.hkbus.enquiry.api.dto.managed.ManagedStopResponse;
+import org.cloudevguru.hkbus.enquiry.api.dto.routefare.v1.RouteFareDto;
 import org.cloudevguru.hkbus.enquiry.api.manager.ManagedManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -24,11 +27,6 @@ public class ManagedController {
 	private ManagedManager managedManager;
 
 	// route
-	@GetMapping(path = "/route")
-	public ManagedRouteListResponse getAllRouteList() {
-		return managedManager.getAllRoute();
-	}
-
 	@GetMapping(path = "/route/{route}")
 	public ManagedRouteListResponse getRouteListByRoute(@PathVariable("route") String route) {
 		return managedManager.getRouteByRoute(route);
@@ -88,6 +86,12 @@ public class ManagedController {
 			@PathVariable(name = "serviceType", required = false) String serviceType) {
 		return managedManager.getRouteStopEtaByCompanyAndStopIdAndRouteAndDirectionAndServiceType(company, stopId,
 				route, direction, serviceType);
+	}
+	
+	//Route Fare
+	@GetMapping(path = "/route-fare/{route}")
+	public List<RouteFareDto> getRouteFareByRoute(@PathVariable("route") String route){
+		return managedManager.getRouteFareByRoute(route);
 	}
 
 }

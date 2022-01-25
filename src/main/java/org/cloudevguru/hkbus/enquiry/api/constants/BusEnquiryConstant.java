@@ -28,7 +28,8 @@ public class BusEnquiryConstant {
 	public enum BusCompanyEum {
 		KMB("kmb"),
 		NWFB("nwfb"),
-		CTB("ctb");
+		CTB("ctb"),
+		LWB("lwb");
 
 		private String value;
 
