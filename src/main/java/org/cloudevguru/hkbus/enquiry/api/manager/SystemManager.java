@@ -29,6 +29,7 @@ public class SystemManager {
 	public void cacheAllEvict() {
 		concurrentHashMapService.cleanRouteListChm();
 		concurrentHashMapService.cleanRouteDetailChm();
+		concurrentHashMapService.cleanRouteFareChm();
 	}
 	
 	@Async

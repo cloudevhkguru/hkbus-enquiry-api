@@ -27,5 +27,9 @@ public class UtilityServiceImpl implements UtilityService{
 		}
 		throw new IllegalArgumentException("Company should be 'kmb','ctb','nwfb'");
 	}
-
+	
+	@Override
+	public String removeSpace(String stringObj) {
+		return stringObj.replace(" ", "");
+	}
 }
