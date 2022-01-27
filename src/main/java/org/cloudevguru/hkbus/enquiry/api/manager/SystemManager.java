@@ -27,6 +27,7 @@ public class SystemManager {
 
 	@Scheduled(cron="${evict.cache.cron}")
 	public void cacheAllEvict() {
+		concurrentHashMapService.cleanRawRouteChm();
 		concurrentHashMapService.cleanRouteListChm();
 		concurrentHashMapService.cleanRouteDetailChm();
 		concurrentHashMapService.cleanRouteFareChm();
