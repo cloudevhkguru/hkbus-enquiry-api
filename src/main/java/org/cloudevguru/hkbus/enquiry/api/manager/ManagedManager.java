@@ -69,30 +69,31 @@ public class ManagedManager {
 	private ManagedRouteListResponse getAllRoute() {
 		ManagedRouteListResponse managedResponse = new ManagedRouteListResponse();
 		List<ManagedRouteDto> managedRouteDtos = new ArrayList<ManagedRouteDto>();
-		KMBv1RouteListResponse kmbv1RouteListResponse = kmbManager.getKMBv1RouteList();
-		List<KMBv1RouteDto> kmbRouteDtos = kmbv1RouteListResponse.getDtos();
-		for (KMBv1RouteDto kmbRoute : kmbRouteDtos) {
-			ManagedRouteDto kmbManagedRouteDto = convertKmbRouteDtoToManagedRouteDto(kmbRoute, null, null);
-			kmbManagedRouteDto.setCompany(BusCompanyEum.KMB.getValue().toUpperCase());
-			String key = getRouteKeyForManagedRouteDtoChm(kmbManagedRouteDto);
-			List<ManagedRouteDto> managedRouteList = new ArrayList<ManagedRouteDto>();
-			managedRouteList.add(kmbManagedRouteDto);
-			concurrentHashMapService.putRouteListToRouteListChm(key, managedRouteList);
-			managedRouteDtos.add(kmbManagedRouteDto);
-		}
-		String[] companys = new String[] { BusCompanyEum.CTB.getValue(), BusCompanyEum.NWFB.getValue() };
-		for (String company : companys) {
-			CTBNWFBv1RouteListResponse ctbnwfbv1RouteListResponse = ctbnwfbManager
-					.getCTBNWFBv1AllRoutesByCompany(company);
-			List<CTBNWFBv1RouteDto> ctbnwfbRouteDtos = ctbnwfbv1RouteListResponse.getDtos();
-			for (CTBNWFBv1RouteDto ctbnwfbRoute : ctbnwfbRouteDtos) {
-				ManagedRouteDto ctbManagedRouteDto = convertCtbnwfbRouteDtoToManagedRouteDto(ctbnwfbRoute, null, null);
-				String key = getRouteKeyForManagedRouteDtoChm(ctbManagedRouteDto);
-				List<ManagedRouteDto> managedRouteList = new ArrayList<ManagedRouteDto>();
-				managedRouteList.add(ctbManagedRouteDto);
-				concurrentHashMapService.putRouteListToRouteListChm(key, managedRouteList);
-				managedRouteDtos.add(ctbManagedRouteDto);
+		if (concurrentHashMapService.isEmptyRawRouteChm()) {
+			KMBv1RouteListResponse kmbv1RouteListResponse = kmbManager.getKMBv1RouteList();
+			List<KMBv1RouteDto> kmbRouteDtos = kmbv1RouteListResponse.getDtos();
+			for (KMBv1RouteDto kmbRoute : kmbRouteDtos) {
+				ManagedRouteDto kmbManagedRouteDto = convertKmbRouteDtoToManagedRouteDto(kmbRoute, null, null);
+				kmbManagedRouteDto.setCompany(BusCompanyEum.KMB.getValue().toUpperCase());
+				String key = getRouteKeyForManagedRouteDtoChm(kmbManagedRouteDto);
+				concurrentHashMapService.putRawRouteToRawRouteChm(key, kmbManagedRouteDto);
+				managedRouteDtos.add(kmbManagedRouteDto);
 			}
+			String[] companys = new String[] { BusCompanyEum.CTB.getValue(), BusCompanyEum.NWFB.getValue() };
+			for (String company : companys) {
+				CTBNWFBv1RouteListResponse ctbnwfbv1RouteListResponse = ctbnwfbManager
+						.getCTBNWFBv1AllRoutesByCompany(company);
+				List<CTBNWFBv1RouteDto> ctbnwfbRouteDtos = ctbnwfbv1RouteListResponse.getDtos();
+				for (CTBNWFBv1RouteDto ctbnwfbRoute : ctbnwfbRouteDtos) {
+					ManagedRouteDto ctbManagedRouteDto = convertCtbnwfbRouteDtoToManagedRouteDto(ctbnwfbRoute, null,
+							null);
+					String key = getRouteKeyForManagedRouteDtoChm(ctbManagedRouteDto);
+					concurrentHashMapService.putRawRouteToRawRouteChm(key, ctbManagedRouteDto);
+					managedRouteDtos.add(ctbManagedRouteDto);
+				}
+			}
+		} else {
+			managedRouteDtos=concurrentHashMapService.getAllRawRouteFromRawRouteChm();
 		}
 		managedResponse.setDtos(managedRouteDtos);
 		return managedResponse;
@@ -186,10 +187,10 @@ public class ManagedManager {
 			managedResponse.setDtos(initialRouteList);
 			return managedResponse;
 		}
-		if (concurrentHashMapService.getRouteListFromRouteListChmByRouteStartWith(route).size() != 0) {
+		if (concurrentHashMapService.getRawRouteFromRawRouteChmByRouteStartWith(route).size() != 0) {
 			// Cannot find in ConcurrentHashMap, check route stored in hashmap and return
 			System.out.println(String.format("Find %s in ConcurrentHashMap but not a ROUTE-LIST-BY-ROUTE", route));
-			initialRouteList = concurrentHashMapService.getRouteListFromRouteListChmByRouteStartWith(route);
+			initialRouteList = concurrentHashMapService.getRawRouteFromRawRouteChmByRouteStartWith(route);
 		} else if (concurrentHashMapService.isEmptyRouteListChm()) {
 			// ConcurrentHasMap did not have record, reload it and find
 			System.out.println(
@@ -210,14 +211,17 @@ public class ManagedManager {
 				List<ManagedRouteDto> additionalManagedRouteDtos = getRouteListByCompanyAndRouteAndServiceType(company2,
 						route2, null).getDtos();
 				for (ManagedRouteDto additioManagedRouteDto : additionalManagedRouteDtos) {
-					String routeFareKey=getRouteFareKey(additioManagedRouteDto.getCompany(), additioManagedRouteDto.getRoute(), additioManagedRouteDto.getOriginEn(), additioManagedRouteDto.getDestinationEn());
-					RouteFareDto routeFareDto=getRouteFareByRouteFareKey(routeFareKey);
+					String routeFareKey = getRouteFareKey(additioManagedRouteDto.getCompany(),
+							additioManagedRouteDto.getRoute(), additioManagedRouteDto.getOriginEn(),
+							additioManagedRouteDto.getDestinationEn());
+					RouteFareDto routeFareDto = getRouteFareByRouteFareKey(routeFareKey);
 					additioManagedRouteDto.setFullFare(routeFareDto.getFullFare());
 					finalRouteList.add(additioManagedRouteDto);
 				}
 			} else {
-				String routeFareKey=getRouteFareKey(routeDto.getCompany(), routeDto.getRoute(), routeDto.getOriginEn(), routeDto.getDestinationEn());
-				RouteFareDto routeFareDto=getRouteFareByRouteFareKey(routeFareKey);
+				String routeFareKey = getRouteFareKey(routeDto.getCompany(), routeDto.getRoute(),
+						routeDto.getOriginEn(), routeDto.getDestinationEn());
+				RouteFareDto routeFareDto = getRouteFareByRouteFareKey(routeFareKey);
 				routeDto.setFullFare(routeFareDto.getFullFare());
 				finalRouteList.add(routeDto);
 			}
@@ -378,7 +382,7 @@ public class ManagedManager {
 	}
 
 	private RouteFareDto getRouteFareByRouteFareKey(String routeFareKey) {
-		if(concurrentHashMapService.isEmptyRouteFareDtoChm()) {
+		if (concurrentHashMapService.isEmptyRouteFareDtoChm()) {
 			getAllRouteFare();
 		}
 		String[] routeDetail = routeFareKey.split("-");

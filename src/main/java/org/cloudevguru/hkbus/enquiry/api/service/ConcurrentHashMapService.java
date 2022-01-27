@@ -8,7 +8,13 @@ import org.cloudevguru.hkbus.enquiry.api.dto.routefare.v1.RouteFareDto;
 
 public interface ConcurrentHashMapService {
 	
-	List<ManagedRouteDto> getRouteListFromRouteListChmByRouteStartWith(String route);
+	ManagedRouteDto getRawRouteFromRawRouteChmByRouteKey(String routeKey);
+	
+	List<ManagedRouteDto> getAllRawRouteFromRawRouteChm();
+	
+	List<ManagedRouteDto> getRawRouteFromRawRouteChmByRouteStartWith(String route);
+	
+	ManagedRouteDto putRawRouteToRawRouteChm(String routeKey, ManagedRouteDto managedRouteDto);
 	
 	List<ManagedRouteDto> getRouteListFromRouteListChmByRouteKey(String routeKey);
 
@@ -24,9 +30,13 @@ public interface ConcurrentHashMapService {
 	
 	RouteFareDto putRouteFareDtoTorouteFareDtoChm(String routeFareKey,RouteFareDto routeFareDto);
 	
+	Boolean isEmptyRawRouteChm();
+	
 	Boolean isEmptyRouteListChm();
 	
 	Boolean isEmptyRouteFareDtoChm();
+	
+	void cleanRawRouteChm();
 	
 	void cleanRouteListChm();
 	
