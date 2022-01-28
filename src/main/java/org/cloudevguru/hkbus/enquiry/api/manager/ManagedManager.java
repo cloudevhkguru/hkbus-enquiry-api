@@ -39,10 +39,7 @@ import org.cloudevguru.hkbus.enquiry.api.service.RouteFareService;
 import org.cloudevguru.hkbus.enquiry.api.service.UtilityService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
-
-import net.bytebuddy.asm.Advice.Return;
 
 @Component
 public class ManagedManager {
@@ -187,22 +184,9 @@ public class ManagedManager {
 			managedResponse.setDtos(initialRouteList);
 			return managedResponse;
 		}
-		if (concurrentHashMapService.getRawRouteFromRawRouteChmByRouteStartWith(route).size() != 0) {
-			// Cannot find in ConcurrentHashMap, check route stored in hashmap and return
-			System.out.println(String.format("Find %s in ConcurrentHashMap but not a ROUTE-LIST-BY-ROUTE", route));
-			initialRouteList = concurrentHashMapService.getRawRouteFromRawRouteChmByRouteStartWith(route);
-		} else if (concurrentHashMapService.isEmptyRouteListChm()) {
-			// ConcurrentHasMap did not have record, reload it and find
-			System.out.println(
-					"Cannot find raw route " + route + " in ConcurrentHashMap and ConcurrentHashMap is Empty.");
-			List<ManagedRouteDto> allRouteList = getAllRoute().getDtos();
-			initialRouteList = allRouteList.stream()
-					.filter(routeDto -> routeDto.getRoute().toUpperCase().startsWith(route.toUpperCase()))
-					.collect(Collectors.toList());
-		} else {
-			System.out.println("Cannot find " + route + " in ConcurrentHashMap");
-
-		}
+		// Get from Raw Route List
+		getAllRoute();
+		initialRouteList = concurrentHashMapService.getRawRouteFromRawRouteChmByRouteStartWith(route);
 		ArrayList<ManagedRouteDto> finalRouteList = new ArrayList<ManagedRouteDto>();
 		for (ManagedRouteDto routeDto : initialRouteList) {
 			if (routeDto.getBound() == null) {
